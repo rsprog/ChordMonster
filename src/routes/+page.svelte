@@ -79,7 +79,7 @@
     let notesMap = new Map();
     let currentNotes = [];
     let currentChord = null;
-    let currentScaleDegrees = [];
+    let currentScales = [];
     let allNotes = [];
     let allChords = [];
     let errorMessage = null;
@@ -171,7 +171,7 @@
     function identifyChord()
     {        
         currentChord = null;
-        currentScaleDegrees = [];
+        currentScales = [];
         let chord = null;
         const noteNumbers = [...notesMap].map(([k,v]) => v.number);
         if (noteNumbers.length === 4) {
@@ -183,7 +183,7 @@
         if (chord) {
             currentChord = chord;
             allChords = [...allChords, chord.name];
-            currentScaleDegrees = getChordScales(chord);
+            currentScales = getChordScales(chord);
         }
     }
 
@@ -317,18 +317,19 @@
         const scales = {
             "Major": [2, 2, 1, 2, 2, 2, 1],          // natural major scale
             "Minor": [2, 1, 2, 2, 1, 2, 2],          // matural minor scale
-            "Harmonic Major": [2, 2, 1, 2, 1, 3, 1],  // harmonic major scale
-            "Harmonic Minor": [2, 1, 2, 2, 1, 3, 1],  // harmonic minro scale
-            "Melodic Major": [2, 2, 1, 2, 1, 2, 2],   // melodic major scale
-            "Melodic Minor": [2, 1, 2, 2, 2, 2, 1],   // melodic minor scale
+            //"Harmonic Major": [2, 2, 1, 2, 1, 3, 1],  // harmonic major scale
+            //"Harmonic Minor": [2, 1, 2, 2, 1, 3, 1],  // harmonic minro scale
+            //"Melodic Major": [2, 2, 1, 2, 1, 2, 2],   // melodic major scale
+            //"Melodic Minor": [2, 1, 2, 2, 2, 2, 1],   // melodic minor scale
         };
         const chordNotes = chord.getParentNotes();
         const chordIntervals = getIntervals(chordNotes);
         const chordNoteIndexes = chordNotes.map(s => getNote(s).index);
-        const matchedScales = [];
         const startIndex = 1 + (chordNotes.length - 2) * 2;
+        const matched = [];
         
         for (let scale in scales) {
+            const matchedScales = [];
             const scaleIntervals = [...scales[scale], ...scales[scale].slice(0, startIndex)];
             for (let i=startIndex; i<scaleIntervals.length; i++) {
                 let intervals = [];
@@ -346,12 +347,13 @@
                             matchedScales.push(new ScaleDegree(new Scale(scale, k), scaleNoteIndexes.indexOf(chordNoteIndexes[0]) + 1));
                         }
                     }
+                    matched.push(matchedScales);
                     break;
                 }
             }
         }
 
-        return matchedScales;
+        return matched;
     }
 
     if (browser)
@@ -401,10 +403,15 @@
 
             <div class="break"></div>
 
-            {#if currentScaleDegrees}
+            {#if currentScales}
                 <div class="flex-container scales">
-                    {#each currentScaleDegrees as deg}
-                        <span class="scale"><span class="scale-key">{deg.scale.nameWithKey} </span><span class="scale-degree">{deg.symbol}</span></span>
+                    {#each currentScales as scales, index}
+                        <div class="flex-container scale-group">
+                            {#each scales as deg}
+                                <span class="scale"><span class="scale-key">{deg.scale.nameWithKey} </span><span class="scale-degree">{deg.symbol}</span></span>
+                            {/each}
+                        </div>
+                        <div class="break"></div>
                     {/each}
                 </div>
             {/if}
@@ -434,7 +441,6 @@
         display: flex;
         flex-direction: row;
         height: 100%;
-        justify-content: center;
     }
     #current {
         display: flex;
@@ -447,6 +453,7 @@
         margin: 4px;
         padding: 4px;
         text-align: center;
+        height: 120px;
     }
     .note {
         width: 180px;
@@ -466,9 +473,7 @@
     .chord {
         color: white;
         background-color: green;
-        padding-left: 20px;
-        padding-right: 20px;
-        flex: 1;
+        min-width: 376px;
     }
     .inverted {
         color: black;
@@ -477,7 +482,7 @@
     }
     .inversion-number {
         position: absolute;
-        top: 0px;
+        bottom: 0px;
         right: 0px;
         font-size: 20px;
         margin: 5px;
@@ -493,37 +498,35 @@
         font-size: 20px;
         text-align: center;
         overflow-y: auto;
-        flex: 1; 
-    }
-    #all-chords {
-        flex-direction: column;
-        flex-wrap: nowrap;
-        align-items: center;
+        flex: 1;
     }
     .small-item {
+        color: white;
         margin: 1px;
         padding: 1px;
-        text-align: center;
+        text-align: left;
     }
     .small-note {
-        color: white;
         width: 50px;
     }
     .small-chord {
-        color: white;
+        width: 100px;
     }
     .scales {
         flex-wrap: wrap;
         font-style: italic;
+        font-size: 20px;
+    }
+    .scale-group {
+        margin: 2px;
     }
     .scale {
-        margin: 8px;
+        margin: 4px;
         padding: 4px;
         flex-wrap: wrap;
-    }
+    }    
     .scale-key {
         color: yellow;
-        font-size: 25px;
     }
     .scale-degree {
         color: white;
