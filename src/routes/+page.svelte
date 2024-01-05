@@ -2,10 +2,13 @@
 
     import { browser } from '$app/environment';
 
+    const noteNames = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+
     class Note {
-        constructor(number, name, octave) {
+        constructor(number, name, index, octave) {
             this.number = number;
             this.name = name;
+            this.index = index;
             this.octave = octave;
         }
         get noteWithOctave() {
@@ -30,11 +33,40 @@
         }
     }
 
+    class Scale {
+        constructor(name, keyIndex) {
+            this.name = name;
+            this.keyIndex = keyIndex;
+        }
+        get key() {
+            return noteNames[this.keyIndex];
+        }
+
+        get nameWithKey() {
+            return `${this.key} ${this.name}`;
+        }
+    }
+
+    class ScaleDegree {
+        constructor(scale, degree) {
+            this.scale = scale;
+            this.degree = degree;
+        }
+        degreeSymbols = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+        get name() {
+            return `${this.scale.nameWithKey} [${this.degree}]`;
+        }
+        get symbol() {
+            return this.degreeSymbols[this.degree];
+        }
+    }
+
     let midi = null;
     let midiInputs = [];
     let notesMap = new Map();
     let currentNotes = [];
-    let lastChord = '';
+    let currentChord = null;
+    let currentScaleDegrees = [];
     let allNotes = [];
     let allChords = [];
     let errorMessage = null;
@@ -109,7 +141,7 @@
 
     function handleNoteOn(midiNoteNumber)
     {
-        const note = getNoteNameAndOctave(midiNoteNumber);
+        const note = getNote(midiNoteNumber);
         notesMap.set(midiNoteNumber, note);
         currentNotes = [...notesMap].sort().map(([k,v]) => v);
         allNotes = [...allNotes, note.noteWithOctave];
@@ -125,7 +157,8 @@
 
     function identifyChord()
     {        
-        lastChord = null;
+        currentChord = null;
+        currentScaleDegrees = [];
         let chord = null;
         const noteNumbers = [...notesMap].map(([k,v]) => v.number);
         if (noteNumbers.length === 4) {
@@ -135,16 +168,16 @@
             chord = getTriadChord(noteNumbers);
         }
         if (chord) {
-            lastChord = chord;
+            currentChord = chord;
             allChords = [...allChords, chord.name];
+            currentScaleDegrees = getChordScales(chord);
         }
     }
 
-    function getNoteNameAndOctave(midiNoteNumber) {
-        const noteNames = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+    function getNote(midiNoteNumber) {
         const octave = Math.floor(midiNoteNumber / 12) - 1;
         const noteIndex = midiNoteNumber % 12;
-        return new Note(midiNoteNumber, noteNames[noteIndex], octave);
+        return new Note(midiNoteNumber, noteNames[noteIndex], noteIndex, octave);
     }
 
     function getTriadChord(midiNotes) {
@@ -208,7 +241,7 @@
             { intervals: [2, 4, 3], rootIndex: 1, format: 'R/B7' },       // Dominant seventh chord (third inversion)
             { intervals: [2, 3, 3], rootIndex: 1, format: 'R/Bø7' },      // Half-Diminished seventh chord (third inversion)
             { intervals: [3, 3, 3], rootIndex: 1, format: 'R/Bdim7' },    // Diminished seventh chord (third inversion)
-            { intervals: [1, 3, 4], rootIndex: 1, format: 'R/BminMaj7' }  // Minor-Major seventh chord (third inversion)
+            { intervals: [1, 3, 4], rootIndex: 1, format: 'R/BminMaj7' }, // Minor-Major seventh chord (third inversion)
         ];
 
         return getChord(midiNotes, tetrads);
@@ -218,25 +251,26 @@
     function getChord(midiNotes, chords) {
 
         const sortedNotes = midiNotes.sort((a, b) => a - b);
-
-        const intervals = [];
-        
-        for (var i=0; i<midiNotes.length-1; i++) {
-            intervals.push(sortedNotes[i+1] - sortedNotes[i]);
-        }        
-
+        const intervals = getIntervals(sortedNotes);
         let chord = null;
         
         chords.forEach((c) => {
             if (c.intervals.every((value, index) => value === intervals[index])) {
-            const rootNote = getNoteNameAndOctave(sortedNotes[c.rootIndex]).name;
-            const bassNote = c.rootIndex === 0 ? rootNote : getNoteNameAndOctave(sortedNotes[0]).name;
-            //chord = c.format.replace('R', rootNote).replace('B', bassNote);
-            chord = new Chord(c.format.replace('R', rootNote).replace('B', bassNote), sortedNotes, c.rootIndex);
+                const rootNote = getNote(sortedNotes[c.rootIndex]).name;
+                const bassNote = c.rootIndex === 0 ? rootNote : getNote(sortedNotes[0]).name;
+                chord = new Chord(c.format.replace('R', rootNote).replace('B', bassNote), sortedNotes, c.rootIndex);
             }
         });
         
         return chord;
+    }
+
+    function getIntervals(sortedMidiNotes) {
+        const intervals = [];        
+        for (var i=0; i<sortedMidiNotes.length-1; i++) {
+            intervals.push(sortedMidiNotes[i+1] - sortedMidiNotes[i]);
+        }        
+        return intervals;
     }
 
     function keyCodeToMIDINote(keyCode) {
@@ -256,10 +290,50 @@
             75: 72, // K -> C5
             79: 73, // O -> C#5
             76: 74, // L -> D5
-            80: 75  // P -> D#5
+            80: 75, // P -> D#5
         };
         const midiNote = keyMap[keyCode] || null;
         return midiNote;
+    }
+
+    function getChordScales(chord) {
+        const scales = {
+            "Major": [2, 2, 1, 2, 2, 2, 1],          // natural major scale
+            "Minor": [2, 1, 2, 2, 1, 2, 2],          // matural minor scale
+            "Harmonic Major": [2, 2, 1, 2, 1, 3, 1],  // harmonic major scale
+            "Harmonic Minor": [2, 1, 2, 2, 1, 3, 1],  // harmonic minro scale
+            "Melodic Major": [2, 2, 1, 2, 1, 2, 2],   // melodic major scale
+            "Melodic Minor": [2, 1, 2, 2, 2, 2, 1],   // melodic minor scale
+        };        
+        const chordIntervals = getIntervals(chord.notes);
+        const chordNoteIndexes = chord.notes.map(s => getNote(s).index);
+        const matchedScales = [];
+        const startIndex = 1 + (chord.notes.length - 2) * 2;
+        
+        for (let scale in scales) {
+            const scaleIntervals = [...scales[scale], ...scales[scale].slice(0, startIndex)];
+            for (let i=startIndex; i<scaleIntervals.length; i++) {
+                let intervals = [];
+                for (let j=i-startIndex; j<i; j+=2) {
+                    intervals.push(scaleIntervals[j] + scaleIntervals[j+1]);
+                }
+                if (intervals.every((value, index) => value === chordIntervals[index])) {
+                     // scale matched, now find in which key (or keys) the chord belongs
+                    for (let k=0; k<noteNames.length; k++) {
+                        let scaleNoteIndexes = [k];
+                        for (let x of scales[scale].slice(0, -1)) {
+                            scaleNoteIndexes.push((scaleNoteIndexes[scaleNoteIndexes.length - 1] + x) % 12);
+                        }
+                        if (chordNoteIndexes.every(val => scaleNoteIndexes.includes(val))) {
+                            matchedScales.push(new ScaleDegree(new Scale(scale, k), scaleNoteIndexes.indexOf(chordNoteIndexes[0]) + 1));
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        return matchedScales;
     }
 
     if (browser)
@@ -299,11 +373,21 @@
                 <div class="item note {note.isSharp ? 'black-key' : 'white-key'}">{note.name}<sub class="octave">{note.octave}</sub></div>
             {/each}
 
-            {#if lastChord}
-                <div class="item chord {lastChord.isInverted ? 'inverted' : ''}">{lastChord.name}
-                    {#if lastChord.inversionNumber > 0}
-                        <div class="inversion-number">Inversion {lastChord.inversionNumber}</div>
+            {#if currentChord}
+                <div class="item chord {currentChord.isInverted ? 'inverted' : ''}">{currentChord.name}
+                    {#if currentChord.inversionNumber > 0}
+                        <div class="inversion-number">{currentChord.inversionNumber}</div>
                     {/if}
+                </div>
+            {/if}
+
+            <div class="break"></div>
+
+            {#if currentScaleDegrees}
+                <div class="flex-container scales">
+                    {#each currentScaleDegrees as deg}
+                        <span class="scale"><span class="scale-key">{deg.scale.nameWithKey} </span><span class="scale-degree">{deg.symbol}</span></span>
+                    {/each}
                 </div>
             {/if}
         </div>
@@ -381,6 +465,8 @@
         font-size: 25px;
         margin: 5px;
         padding: 5px;
+        width: 25px;
+        height: 25px;
         color: #db7fff;
         background-color: black;
     }
@@ -410,6 +496,27 @@
     }
     .small-chord {
         color: white;
+    }
+    .scales {
+        flex-wrap: wrap;
+        font-style: italic;
+    }
+    .scale {
+        margin: 8px;
+        padding: 4px;
+        flex-wrap: wrap;
+    }
+    .scale-key {
+        color: yellow;
+        font-size: 25px;
+    }
+    .scale-degree {
+        color: white;
+        font-size: 15px;
+    }
+    .break {
+        flex-basis: 100%;
+        height: 0;
     }
 </style>
 
