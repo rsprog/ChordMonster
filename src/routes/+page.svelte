@@ -83,6 +83,7 @@
     let allNotes = [];
     let allChords = [];
     let errorMessage = null;
+    let insertMode = false;
 
     function onMIDISuccess(midiAccess) {
         midiAccess.onstatechange = onMIDIStateChange;
@@ -134,6 +135,30 @@
 
     function onKeyDown(event) {
         if (!event.repeat) {
+            if (event.keyCode === 45) { // insert
+                event.preventDefault();
+                insertMode = !insertMode;
+            }
+            if (event.keyCode === 46) { // delete
+                event.preventDefault();
+                notesMap.clear();
+                currentChord = null;
+                currentScales = [];
+                currentNotes = [];
+                if (event.ctrlKey) {
+                    allNotes = [];
+                    allChords = [];
+                }
+            }
+            if (event.keyCode === 8) { // backspace
+                event.preventDefault();
+                if (notesMap.size > 0) {
+                    const lastEntryKey = [...notesMap.keys()].pop();
+                    notesMap.delete(lastEntryKey);
+                    currentNotes = [...notesMap].sort().map(([k,v]) => v);
+                    identifyChord();
+                }
+            }
             const midiNoteNumber = keyCodeToMIDINote(event.keyCode);
             if (midiNoteNumber) {
                 event.preventDefault();
@@ -163,9 +188,11 @@
 
     function handleNoteOff(midiNoteNumber)
     {
-        notesMap.delete(midiNoteNumber);
-        currentNotes = [...notesMap].sort().map(([k,v]) => v);
-        identifyChord();
+        if (!insertMode) {
+            notesMap.delete(midiNoteNumber);
+            currentNotes = [...notesMap].sort().map(([k,v]) => v);
+            identifyChord();
+        }
     }
 
     function identifyChord()
