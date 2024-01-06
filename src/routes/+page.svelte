@@ -4,6 +4,24 @@
 
     const noteNames = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
 
+    const chordTypes = {
+        'maj': {symbol: '', dom: true},
+        'min': {symbol: '', dom: false},
+        'aug': {symbol: '⁺', dom: true},        
+        'dim': {symbol: '°', dom: false},
+        'sus2': {symbol: 'sus2', dom: true},
+        'sus4': {symbol: 'sus4', dom: true},
+        'maj7': {symbol: '⁷', dom: true},
+        'min7': {symbol: '⁷', dom: false},
+        'dom7': {symbol: '⁷', dom: true},
+        'dim7': {symbol: '°⁷', dom: false},        
+        'min7♭5': {symbol: 'ø⁷', dom: false},
+        'maj7♯5': {symbol: '⁺⁷', dom: true},
+        'minMaj7': {symbol: '⁷', dom: false},
+        '7sus2': {symbol: '⁷sus2', dom: true},
+        '7sus4': {symbol: '⁷sus4', dom: true},
+    };
+
     class Note {
         constructor(number, name, index, octave) {
             this.number = number;
@@ -20,10 +38,11 @@
     }
 
     class Chord {
-        constructor(name, notes, rootIndex) {
+        constructor(name, notes, rootIndex, chordType) {
             this.name = name;
             this.notes = notes;
             this.rootIndex = rootIndex;
+            this.chordType = chordType;
         }
         get isInverted() {
             return this.rootIndex > 0;
@@ -61,16 +80,20 @@
     }
 
     class ScaleDegree {
-        constructor(scale, degree) {
+        constructor(scale, degree, chordType) {
             this.scale = scale;
             this.degree = degree;
+            this.chordType = chordType;
         }
-        degreeSymbols = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+        degreeSymbols = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];        
         get name() {
             return `${this.scale.nameWithKey} [${this.degree}]`;
         }
         get symbol() {
-            return this.degreeSymbols[this.degree];
+            let numeral =  this.degreeSymbols[this.degree];
+            if (!this.chordType.dom)
+                numeral = numeral.toLowerCase();
+            return numeral + this.chordType.symbol;
         }
     }
 
@@ -85,6 +108,7 @@
     let octave = 4; // current octave, for non-midi notes only
     let errorMessage = null;
     let insertMode = false;
+    let infoTextVisible = true;
 
     function onMIDISuccess(midiAccess) {
         midiAccess.onstatechange = onMIDIStateChange;
@@ -194,6 +218,7 @@
         currentNotes = getCurrentNotes();
         allNotes = [...allNotes, note.noteWithOctave];
         identifyChord();
+        infoTextVisible = false;
     }
 
     function handleNoteOff(midiNoteNumber)
@@ -270,34 +295,46 @@
         const tetrads = [
             { intervals: [4, 3, 4], rootIndex: 0, format: 'maj7' },      // Major seventh chord (root position)
             { intervals: [3, 4, 3], rootIndex: 0, format: 'min7' },      // Minor seventh chord (root position)
-            { intervals: [4, 3, 3], rootIndex: 0, format: '7' },         // Dominant seventh chord (root position)
-            { intervals: [3, 3, 4], rootIndex: 0, format: 'ø7' },        // Half-Diminished seventh chord (root position)
+            { intervals: [4, 3, 3], rootIndex: 0, format: 'dom7' },      // Dominant seventh chord (root position)
+            { intervals: [3, 3, 4], rootIndex: 0, format: 'min7♭5' },    // Half-Diminished seventh chord (root position)
             { intervals: [3, 3, 3], rootIndex: 0, format: 'dim7' },      // Diminished seventh chord (root position)
             { intervals: [3, 4, 4], rootIndex: 0, format: 'minMaj7' },   // Minor-Major seventh chord (root position)
+            { intervals: [4, 4, 3], rootIndex: 0, format: 'maj7♯5' },    // Augmented seventh chord (root position)
+            { intervals: [2, 5, 3], rootIndex: 0, format: '7sus2' },     // Seventh suspended second chord (root position)
+            { intervals: [5, 2, 3], rootIndex: 0, format: '7sus4' },     // Seventh suspended fourth chord (root position)
 
             // First Inversions
-            { intervals: [3, 4, 1], rootIndex: 3, format: 'maj7' },    // Major seventh chord (first inversion)
-            { intervals: [4, 3, 2], rootIndex: 3, format: 'min7' },    // Minor seventh chord (first inversion)
-            { intervals: [3, 3, 2], rootIndex: 3, format: '7' },       // Dominant seventh chord (first inversion)
-            { intervals: [3, 4, 2], rootIndex: 3, format: 'ø7' },      // Half-Diminished seventh chord (first inversion)
-            { intervals: [3, 3, 3], rootIndex: 3, format: 'dim7' },    // Diminished seventh chord (first inversion)
-            { intervals: [4, 4, 1], rootIndex: 3, format: 'minMaj7' }, // Minor-Major seventh chord (first inversion)
+            { intervals: [3, 4, 1], rootIndex: 3, format: 'maj7' },      // Major seventh chord (first inversion)
+            { intervals: [4, 3, 2], rootIndex: 3, format: 'min7' },      // Minor seventh chord (first inversion)
+            { intervals: [3, 3, 2], rootIndex: 3, format: 'dom7' },      // Dominant seventh chord (first inversion)
+            { intervals: [3, 4, 2], rootIndex: 3, format: 'min7♭5' },    // Half-Diminished seventh chord (first inversion)
+            { intervals: [3, 3, 3], rootIndex: 3, format: 'dim7' },      // Diminished seventh chord (first inversion)
+            { intervals: [4, 4, 1], rootIndex: 3, format: 'minMaj7' },   // Minor-Major seventh chord (first inversion)
+            { intervals: [4, 3, 1], rootIndex: 3, format: 'maj7♯5' },    // Augmented seventh chord (first inversion)
+            { intervals: [5, 3, 2], rootIndex: 3, format: '7sus2' },     // Seventh suspended second chord (first inversion)
+            { intervals: [2, 3, 2], rootIndex: 3, format: '7sus4' },     // Seventh suspended fourth chord (first inversion)
 
             // Second Inversions
-            { intervals: [4, 1, 4], rootIndex: 2, format: 'maj7' },    // Major seventh chord (second inversion)
-            { intervals: [3, 2, 3], rootIndex: 2, format: 'min7' },    // Minor seventh chord (second inversion)
-            { intervals: [3, 2, 4], rootIndex: 2, format: '7' },       // Dominant seventh chord (second inversion)
-            { intervals: [4, 2, 3], rootIndex: 2, format: 'ø7' },      // Half-Diminished seventh chord (second inversion)
-            { intervals: [3, 3, 3], rootIndex: 2, format: 'dim7' },    // Diminished seventh chord (second inversion)
-            { intervals: [4, 1, 3], rootIndex: 2, format: 'minMaj7' }, // Minor-Major seventh chord (second inversion)
+            { intervals: [4, 1, 4], rootIndex: 2, format: 'maj7' },      // Major seventh chord (second inversion)
+            { intervals: [3, 2, 3], rootIndex: 2, format: 'min7' },      // Minor seventh chord (second inversion)
+            { intervals: [3, 2, 4], rootIndex: 2, format: 'dom7' },      // Dominant seventh chord (second inversion)
+            { intervals: [4, 2, 3], rootIndex: 2, format: 'min7♭5' },    // Half-Diminished seventh chord (second inversion)
+            { intervals: [3, 3, 3], rootIndex: 2, format: 'dim7' },      // Diminished seventh chord (second inversion)
+            { intervals: [4, 1, 3], rootIndex: 2, format: 'minMaj7' },   // Minor-Major seventh chord (second inversion)
+            { intervals: [3, 1, 4], rootIndex: 2, format: 'maj7♯5' },    // Augmented seventh chord (second inversion)
+            { intervals: [3, 2, 2], rootIndex: 2, format: '7sus2' },     // Seventh suspended second chord (second inversion)
+            { intervals: [3, 2, 5], rootIndex: 2, format: '7sus4' },     // Seventh suspended fourth chord (second inversion)
 
             // Third Inversions
-            { intervals: [1, 4, 3], rootIndex: 1, format: 'maj7' },    // Major seventh chord (third inversion)
-            { intervals: [2, 3, 4], rootIndex: 1, format: 'min7' },    // Minor seventh chord (third inversion)
-            { intervals: [2, 4, 3], rootIndex: 1, format: '7' },       // Dominant seventh chord (third inversion)
-            { intervals: [2, 3, 3], rootIndex: 1, format: 'ø7' },      // Half-Diminished seventh chord (third inversion)
-            { intervals: [3, 3, 3], rootIndex: 1, format: 'dim7' },    // Diminished seventh chord (third inversion)
-            { intervals: [1, 3, 4], rootIndex: 1, format: 'minMaj7' }, // Minor-Major seventh chord (third inversion)
+            { intervals: [1, 4, 3], rootIndex: 1, format: 'maj7' },      // Major seventh chord (third inversion)
+            { intervals: [2, 3, 4], rootIndex: 1, format: 'min7' },      // Minor seventh chord (third inversion)
+            { intervals: [2, 4, 3], rootIndex: 1, format: 'dom7' },      // Dominant seventh chord (third inversion)
+            { intervals: [2, 3, 3], rootIndex: 1, format: 'min7♭5' },    // Half-Diminished seventh chord (third inversion)
+            { intervals: [3, 3, 3], rootIndex: 1, format: 'dim7' },      // Diminished seventh chord (third inversion)
+            { intervals: [1, 3, 4], rootIndex: 1, format: 'minMaj7' },   // Minor-Major seventh chord (third inversion)
+            { intervals: [1, 4, 4], rootIndex: 1, format: 'maj7♯5' },    // Augmented seventh chord (third inversion)
+            { intervals: [2, 2, 5], rootIndex: 1, format: '7sus2' },     // Seventh suspended second chord (third inversion)
+            { intervals: [2, 5, 2], rootIndex: 1, format: '7sus4' },     // Seventh suspended fourth chord (third inversion)
         ];
 
         return getChord(midiNotes, tetrads);
@@ -310,16 +347,17 @@
         const intervals = getIntervals(sortedNotes);
         let chord = null;
         
-        chords.forEach((c) => {
+        for (let c of chords) {
             if (c.intervals.every((value, index) => value === intervals[index])) {
                 const rootNoteName = getNote(sortedNotes[c.rootIndex]).name;
                 const bassNoteName = c.rootIndex === 0 ? rootNoteName : getNote(sortedNotes[0]).name;
                 let chordName = rootNoteName + c.format;
                 if (bassNoteName !== rootNoteName)
                     chordName += '/' + bassNoteName;
-                chord = new Chord(chordName, sortedNotes, c.rootIndex);
+                chord = new Chord(chordName, sortedNotes, c.rootIndex, chordTypes[c.format]);
+                break;
             }
-        });
+        };
         
         return chord;
     }
@@ -368,12 +406,12 @@
 
     function getChordScales(chord) {
         const scales = {
-            "Major": [2, 2, 1, 2, 2, 2, 1],          // natural major scale
-            "Minor": [2, 1, 2, 2, 1, 2, 2],          // matural minor scale
-            //"Harmonic Major": [2, 2, 1, 2, 1, 3, 1],  // harmonic major scale
-            //"Harmonic Minor": [2, 1, 2, 2, 1, 3, 1],  // harmonic minro scale
-            //"Melodic Major": [2, 2, 1, 2, 1, 2, 2],   // melodic major scale
-            //"Melodic Minor": [2, 1, 2, 2, 2, 2, 1],   // melodic minor scale
+            "Major": [2, 2, 1, 2, 2, 2, 1],           // natural major scale
+            "Minor": [2, 1, 2, 2, 1, 2, 2],           // matural minor scale
+            "Harmonic Major": [2, 2, 1, 2, 1, 3, 1],  // harmonic major scale
+            "Harmonic Minor": [2, 1, 2, 2, 1, 3, 1],  // harmonic minro scale
+            "Melodic Major": [2, 2, 1, 2, 1, 2, 2],   // melodic major scale
+            "Melodic Minor": [2, 1, 2, 2, 2, 2, 1],   // melodic minor scale
         };
         const chordNotes = chord.getParentNotes();
         const chordIntervals = getIntervals(chordNotes);
@@ -397,7 +435,7 @@
                             scaleNoteIndexes.push((scaleNoteIndexes[scaleNoteIndexes.length - 1] + x) % 12);
                         }
                         if (chordNoteIndexes.every(val => scaleNoteIndexes.includes(val))) {
-                            matchedScales.push(new ScaleDegree(new Scale(scale, k), scaleNoteIndexes.indexOf(chordNoteIndexes[0]) + 1));
+                            matchedScales.push(new ScaleDegree(new Scale(scale, k), scaleNoteIndexes.indexOf(chordNoteIndexes[0]) + 1, chord.chordType));
                         }
                     }
                     matched.push(matchedScales);
@@ -418,7 +456,11 @@
 
 <main>
 
-    <div id="devices">
+    <div id="logo">
+        [achord.top]
+    </div>
+
+    <div id="top-bar">
         {#if midi}
             {#if midiInputs.length === 0}
                 Plug in your MIDI device or use keyboard to play notes
@@ -442,6 +484,22 @@
         </div>
 
         <div id="current">
+            {#if infoTextVisible}
+            <div class="info">
+                <p id="about">
+                    Use your MIDI device or computer keyboard to enter notes. If you play a triad or a seventh chord, it will be identified and relevant scales shown. 
+                    Press INSERT to toggle whether or not the notes stay on the screen once the keys are released. 
+                    Press DELETE to remove any notes from the screen and CTRL+DELETE to clear everything. Press BACKSPACE to delete last note entered.
+                </p>
+                {#if midiInputs.length === 0}
+                    <p id="keymap">
+                        MIDI device support requries Chrome, Edge, Firefox or Opera browser.<br />
+                        If not using a MIDI device, use numeric keys to set octave and use the following letters to enter notes:<br />
+                        A = C, W = C#, S = D, E = D#, D = E, F = F, T = F#, G = G, Y = G#, H = A, U = A#, J = B, K = C, O = C#, L = D, P = D#
+                    </p>
+                {/if}
+            </div>
+            {/if}
             {#each currentNotes as note}
                 <div class="item note {note.isSharp ? 'black-key' : 'white-key'}">{note.name}<sub class="octave">{note.octave}</sub></div>
             {/each}
@@ -485,15 +543,43 @@
         background-color: #333;
         color: white;
     }
-    #devices {
+    #top-bar {
         margin-bottom: 10px;
         padding: 4px;
         border-bottom: 2px solid #555;
+        text-align: center;
+        color: #CCC;
+    }
+    #logo {
+        top: 0px;
+        right: 0px;
+        text-align: center;
+        font-size: 25px;
+        font-family: sans-serif;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        padding: 5x;
+        color: white;        
+        letter-spacing: 10px;
     }
     .flex-container {
         display: flex;
         flex-direction: row;
         height: 100%;
+    }
+    .info {
+        flex: 1;
+        text-align: left;
+        font-size: 18px;
+        line-height: 28px;
+        margin: 10px;
+        padding-left: 20px;
+        padding-right: 20px;
+        text-align: justify;
+        background-color: #111;
+        border: 1px solid white;
+        box-shadow: 0px 1px 2px 2px black;
+        font-style: italic;
     }
     #current {
         display: flex;
@@ -535,8 +621,8 @@
     }
     .inversion-number {
         position: absolute;
-        bottom: 0px;
-        right: 0px;
+        top: 0px;
+        left: 0px;
         font-size: 20px;
         margin: 5px;
         padding: 5px;
@@ -558,12 +644,13 @@
         margin: 1px;
         padding: 1px;
         text-align: left;
+        font-size: 14px;
     }
     .small-note {
         width: 50px;
     }
     .small-chord {
-        width: 100px;
+        width: 120px;
     }
     .scales {
         flex-wrap: wrap;
@@ -583,7 +670,7 @@
     }
     .scale-degree {
         color: white;
-        font-size: 15px;
+        font-size: 18px;
     }
     .break {
         flex-basis: 100%;
