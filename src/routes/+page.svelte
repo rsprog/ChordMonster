@@ -42,7 +42,7 @@
                 const offset = this.notes.length - i <= this.inversionNumber ? 12 : 0;
                 nonInvertedNotes.push(this.notes[i] - offset);
             }
-            return nonInvertedNotes.sort();
+            return nonInvertedNotes.toSorted((a,b) => a-b);
         }
     }
 
@@ -82,6 +82,7 @@
     let currentScales = [];
     let allNotes = [];
     let allChords = [];
+    let octave = 4; // current octave, for non-midi notes only
     let errorMessage = null;
     let insertMode = false;
 
@@ -139,7 +140,7 @@
                 event.preventDefault();
                 insertMode = !insertMode;
             }
-            if (event.keyCode === 46) { // delete
+            else if (event.keyCode === 46) { // delete
                 event.preventDefault();
                 notesMap.clear();
                 currentChord = null;
@@ -150,19 +151,28 @@
                     allChords = [];
                 }
             }
-            if (event.keyCode === 8) { // backspace
+            else if (event.keyCode === 8) { // backspace
                 event.preventDefault();
                 if (notesMap.size > 0) {
                     const lastEntryKey = [...notesMap.keys()].pop();
                     notesMap.delete(lastEntryKey);
-                    currentNotes = [...notesMap].sort().map(([k,v]) => v);
+                    currentNotes = getCurrentNotes();
                     identifyChord();
                 }
-            }
-            const midiNoteNumber = keyCodeToMIDINote(event.keyCode);
-            if (midiNoteNumber) {
-                event.preventDefault();
-                handleNoteOn(midiNoteNumber);
+            }            
+            else { // handle notes and octave changes
+                const midiNoteNumber = keyCodeToMIDINote(event.keyCode);
+                if (midiNoteNumber) {
+                    event.preventDefault();
+                    handleNoteOn(midiNoteNumber);
+                }
+                else {
+                    const octaveNumber = keyCodeToOctave(event.keyCode);
+                    if (octaveNumber) {
+                        event.preventDefault();
+                        octave = octaveNumber;
+                    }
+                }
             }
         }
     }
@@ -181,7 +191,7 @@
     {
         const note = getNote(midiNoteNumber);
         notesMap.set(midiNoteNumber, note);
-        currentNotes = [...notesMap].sort().map(([k,v]) => v);
+        currentNotes = getCurrentNotes();
         allNotes = [...allNotes, note.noteWithOctave];
         identifyChord();
     }
@@ -190,7 +200,7 @@
     {
         if (!insertMode) {
             notesMap.delete(midiNoteNumber);
-            currentNotes = [...notesMap].sort().map(([k,v]) => v);
+            currentNotes = getCurrentNotes();
             identifyChord();
         }
     }
@@ -219,6 +229,11 @@
         const noteIndex = midiNoteNumber % 12;
         return new Note(midiNoteNumber, noteNames[noteIndex], noteIndex, octave);
     }
+    
+    function getCurrentNotes()
+    {
+        return [...notesMap].map(([k,v]) => v).toSorted((a,b) => a.number-b.number);
+    }    
 
     function getTriadChord(midiNotes) {
 
@@ -291,7 +306,7 @@
 
     function getChord(midiNotes, chords) {
 
-        const sortedNotes = midiNotes.sort((a, b) => a - b);
+        const sortedNotes = midiNotes.toSorted((a, b) => a - b);
         const intervals = getIntervals(sortedNotes);
         let chord = null;
         
@@ -319,25 +334,36 @@
 
     function keyCodeToMIDINote(keyCode) {
         const keyMap = {
-            65: 60, // A -> C4
-            87: 61, // W -> C#4
-            83: 62, // S -> D4
-            69: 63, // E -> D#4
-            68: 64, // D -> E4
-            70: 65, // F -> F4
-            84: 66, // T -> F#4
-            71: 67, // G -> G4
-            89: 68, // Y -> G#4
-            72: 69, // H -> A4
-            85: 70, // U -> A#4
-            74: 71, // J -> B4
-            75: 72, // K -> C5
-            79: 73, // O -> C#5
-            76: 74, // L -> D5
-            80: 75, // P -> D#5
+            65: 12, // A -> C
+            87: 13, // W -> C#
+            83: 14, // S -> D
+            69: 15, // E -> D#
+            68: 16, // D -> E
+            70: 17, // F -> F
+            84: 18, // T -> F#
+            71: 19, // G -> G
+            89: 20, // Y -> G#
+            72: 21, // H -> A
+            85: 22, // U -> A#
+            74: 23, // J -> B
+            75: 24, // K -> C
+            79: 25, // O -> C#
+            76: 26, // L -> D
+            80: 27, // P -> D#
         };
-        const midiNote = keyMap[keyCode] || null;
+        const midiNote = keyMap[keyCode] + (octave * 12) || null;
         return midiNote;
+    }
+
+    function keyCodeToOctave(keyCode) {
+        // allow only digits 1-9 (both normal and numpad)
+        if (keyCode >= 49 && keyCode <= 57) {
+            return keyCode - 48;
+        }
+        if (keyCode >= 97 && keyCode <= 105) {
+            return keyCode - 96;
+        }
+        return null;
     }
 
     function getChordScales(chord) {
