@@ -676,17 +676,19 @@
         width: 100px;
     }
     .scales {
-        flex-wrap: wrap;
+        flex-direction: column;
         font-style: italic;
         font-size: 20px;
     }
     .scale-group {
-        margin: 2px;
+        margin: 4px;
+        flex-wrap: wrap;        
     }
     .scale {
-        margin: 4px;
-        padding: 4px;
+        margin: 2px;
+        padding: 2px;
         flex-wrap: wrap;
+        white-space: nowrap;
     }    
     .scale-key {
         color: lawngreen;
