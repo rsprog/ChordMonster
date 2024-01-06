@@ -569,7 +569,7 @@
     }
     #logo {
         text-align: center;
-        font-size: 40px;
+        font-size: 34px;
         font-family: monospace;
         margin: 20px 0px 40px 0px;
         padding: 5x;
@@ -585,7 +585,7 @@
     .info {
         flex: 1;
         text-align: left;
-        font-size: 18px;
+        font-size: 16px;
         line-height: 28px;
         margin: 5px;
         padding-left: 20px;
@@ -701,6 +701,24 @@
         flex-basis: 100%;
         height: 0;
     }
+    @media screen and (max-width: 600px) {
+        .item {
+            font-size: 50px;
+            height: 60px;            
+        }
+        .note {
+            width: 90px;
+        }           
+        .chord {
+            min-width: 196px;
+        }
+        .scales {
+            font-size: 14px;
+        }
+        .scale-degree {
+            font-size: 12px;
+        }
+    }    
 </style>
 
 <svelte:window on:keydown={onKeyDown} on:keyup={onKeyUp} />
