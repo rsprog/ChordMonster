@@ -109,6 +109,7 @@
     let errorMessage = null;
     let insertMode = false;
     let infoTextVisible = true;
+    let showHistory = false;
 
     function onMIDISuccess(midiAccess) {
         midiAccess.onstatechange = onMIDIStateChange;
@@ -183,7 +184,11 @@
                     currentNotes = getCurrentNotes();
                     identifyChord();
                 }
-            }            
+            }
+            else if (event.keyCode === 32) { // spacebar
+                event.preventDefault();
+                showHistory = !showHistory;
+            }
             else { // handle notes and octave changes
                 const midiNoteNumber = keyCodeToMIDINote(event.keyCode);
                 if (midiNoteNumber) {
@@ -456,10 +461,6 @@
 
 <main>
 
-    <div id="logo">
-        [chord.monster]
-    </div>
-
     <div id="top-bar">
         {#if midi}
             {#if midiInputs.length === 0}
@@ -477,27 +478,39 @@
 
     <div class="flex-container">        
 
-        <div id="all-notes" class="sidebar">
+        <div id="all-notes" class={showHistory ? 'sidebar' : 'sidebar-disabled'}>
             {#each allNotes as note}
                 <div class="small-item small-note">{note}</div>
             {/each}
         </div>
 
-        <div id="current">
+        <div id="current" style="width: {showHistory ? '70%' : '100%'};">
             {#if infoTextVisible}
             <div class="info">
+
+                <div id="logo">
+                    [chord.monster]
+                </div>            
+
+                <h4>About</h4>
                 <p id="about">
-                    Use your MIDI device or computer keyboard to enter notes. If you play a triad or a seventh chord, it will be identified and relevant scales shown. 
-                    Press INSERT to toggle whether or not the notes stay on the screen once the keys are released. 
-                    Press DELETE to remove any notes from the screen and CTRL+DELETE to clear notes and history. Press BACKSPACE to delete last note entered.
+                    Start playing notes using your USB-connected MIDI device or computer keyboard. 
+                    If you play a triad or a seventh chord, in either root or inverted position, it will be identified and relevant scales shown where applicable. 
+                    Note that not every chord and scale is spported at this time.
                 </p>
-                {#if midiInputs.length === 0}
-                    <p id="keymap">
-                        MIDI device support requries Chrome, Edge, Firefox or Opera browser. 
-                        If not using a MIDI device, use numeric keys to set octave and use the following letters to enter notes:<br />
-                        A = C, W = C#, S = D, E = D#, D = E, F = F, T = F#, G = G, Y = G#, H = A, U = A#, J = B, K = C, O = C#, L = D, P = D#
-                    </p>
-                {/if}
+                <p>
+                    Direct any feedback to support@chord.monster
+                </p>
+                <h4>Keyboard shortcuts</h4>
+                <p id="keymap">
+                    Press INSERT to toggle whether or not the notes stay on the screen once the keys are released. 
+                    Press DELETE to remove any notes from the screen and CTRL+DELETE to clear notes and history. 
+                    Press BACKSPACE to delete last note entered. 
+                    Press SPACEBAR to toggle history view of previously played notes and chords.<br /><br />
+                    MIDI device support requries Chrome, Edge, Firefox or Opera browser. 
+                    If not using a MIDI device, use numeric keys to set octave and use the following letters to enter notes:<br />
+                    A = C, W = C#, S = D, E = D#, D = E, F = F, T = F#, G = G, Y = G#, H = A, U = A#, J = B, K = C, O = C#, L = D, P = D#
+                </p>
             </div>
             {/if}
             {#each currentNotes as note}
@@ -516,10 +529,13 @@
 
             {#if currentScales}
                 <div class="flex-container scales">
-                    {#each currentScales as scales, index}
+                    {#each currentScales as scales}
                         <div class="flex-container scale-group">
                             {#each scales as deg}
-                                <span class="scale"><span class="scale-key">{deg.scale.nameWithKey} </span><span class="scale-degree">{deg.symbol}</span></span>
+                                <span class="scale">
+                                    <span class="scale-key">{deg.scale.nameWithKey} </span>
+                                    <span class="scale-degree">{deg.symbol}</span>
+                                </span>
                             {/each}
                         </div>
                         <div class="break"></div>
@@ -528,7 +544,7 @@
             {/if}
         </div>
 
-        <div id="all-chords" class="sidebar">
+        <div id="all-chords" class={showHistory ? 'sidebar' : 'sidebar-disabled'}>
             {#each allChords as chord}
                 <div class="small-item small-chord">{chord}</div>
             {/each}
@@ -547,32 +563,31 @@
         margin-bottom: 10px;
         padding: 4px;
         border-bottom: 2px solid #555;
-        text-align: center;
+        text-align: left;
         color: #CCC;
+        font-size: 14px;
     }
     #logo {
-        top: 0px;
-        right: 0px;
         text-align: center;
-        font-size: 25px;
-        font-family: sans-serif;
-        margin-top: 10px;
-        margin-bottom: 20px;
+        font-size: 40px;
+        font-family: monospace;
+        margin: 20px 0px 40px 0px;
         padding: 5x;
-        color: white;        
-        letter-spacing: 10px;
+        color: lawngreen;
+        letter-spacing: 8px;
+        font-style: normal;        
     }
     .flex-container {
         display: flex;
         flex-direction: row;
-        height: 100%;
+        height: 100%;        
     }
     .info {
         flex: 1;
         text-align: left;
         font-size: 18px;
         line-height: 28px;
-        margin: 10px;
+        margin: 5px;
         padding-left: 20px;
         padding-right: 20px;
         text-align: justify;
@@ -580,6 +595,10 @@
         border: 1px solid white;
         box-shadow: 0px 1px 2px 2px black;
         font-style: italic;
+    }
+    .info h4 {
+        text-align: center;
+        text-decoration: underline;
     }
     #current {
         display: flex;
@@ -639,18 +658,22 @@
         overflow-y: auto;
         flex: 1;
     }
+    .sidebar-disabled {
+        display: none;
+    }
     .small-item {
         color: white;
         margin: 1px;
         padding: 1px;
-        text-align: left;
-        font-size: 14px;
+        font-size: 12px;
+        font-family: monospace;
+        text-align: left;        
     }
     .small-note {
-        width: 50px;
+        width: 40px;
     }
     .small-chord {
-        width: 120px;
+        width: 100px;
     }
     .scales {
         flex-wrap: wrap;
@@ -666,7 +689,7 @@
         flex-wrap: wrap;
     }    
     .scale-key {
-        color: yellow;
+        color: lawngreen;
     }
     .scale-degree {
         color: white;
