@@ -266,12 +266,12 @@
             return null;
 
         const triads = [
-            { intervals: [3, 4], rootIndex: 0, format: 'min' },    // Minor chord (root position)
-            { intervals: [4, 3], rootIndex: 0, format: 'maj' },    // Major chord (root position)
-            { intervals: [3, 3], rootIndex: 0, format: 'dim' },    // Diminished chord (root position)
-            { intervals: [4, 4], rootIndex: 0, format: 'aug' },    // Augmented chord (root position)
-            { intervals: [2, 5], rootIndex: 0, format: 'sus2' },   // Suspended Second chord (root position)
-            { intervals: [5, 2], rootIndex: 0, format: 'sus4' },   // Suspended Fourth chord (root position)
+            { intervals: [3, 4], rootIndex: 0, format: 'min' },  // Minor chord (root position)
+            { intervals: [4, 3], rootIndex: 0, format: 'maj' },  // Major chord (root position)
+            { intervals: [3, 3], rootIndex: 0, format: 'dim' },  // Diminished chord (root position)
+            { intervals: [4, 4], rootIndex: 0, format: 'aug' },  // Augmented chord (root position)
+            { intervals: [2, 5], rootIndex: 0, format: 'sus2' }, // Suspended Second chord (root position)
+            { intervals: [5, 2], rootIndex: 0, format: 'sus4' }, // Suspended Fourth chord (root position)
 
             // First Inversions (duplicates omitted)
             { intervals: [4, 5], rootIndex: 2, format: 'min' },  // Minor chord (first inversion)
@@ -457,7 +457,7 @@
 <main>
 
     <div id="logo">
-        [achord.top]
+        [chord.monster]
     </div>
 
     <div id="top-bar">
@@ -489,11 +489,11 @@
                 <p id="about">
                     Use your MIDI device or computer keyboard to enter notes. If you play a triad or a seventh chord, it will be identified and relevant scales shown. 
                     Press INSERT to toggle whether or not the notes stay on the screen once the keys are released. 
-                    Press DELETE to remove any notes from the screen and CTRL+DELETE to clear everything. Press BACKSPACE to delete last note entered.
+                    Press DELETE to remove any notes from the screen and CTRL+DELETE to clear notes and history. Press BACKSPACE to delete last note entered.
                 </p>
                 {#if midiInputs.length === 0}
                     <p id="keymap">
-                        MIDI device support requries Chrome, Edge, Firefox or Opera browser.<br />
+                        MIDI device support requries Chrome, Edge, Firefox or Opera browser. 
                         If not using a MIDI device, use numeric keys to set octave and use the following letters to enter notes:<br />
                         A = C, W = C#, S = D, E = D#, D = E, F = F, T = F#, G = G, Y = G#, H = A, U = A#, J = B, K = C, O = C#, L = D, P = D#
                     </p>
@@ -624,8 +624,8 @@
         top: 0px;
         left: 0px;
         font-size: 20px;
-        margin: 5px;
-        padding: 5px;
+        margin: 2px;
+        padding: 2px;
         width: 15px;
         height: 15px;
     }
