@@ -703,7 +703,7 @@
         width: 100px;
     }
     .dup-note {
-        opacity: 50%;
+        opacity: 40%;
     }
     .white-key {
         color: black;
@@ -724,10 +724,11 @@
         position: relative;
     }
     .chord-info {
-        color: black;        
+        color: #333;
         height: 10px;
         line-height: 10px;
-        font-size: 9px;
+        font-size: 10px;
+        font-family: sans-serif;
         position: absolute;
         left: 0px;
         width: 100%;
@@ -736,12 +737,12 @@
         letter-spacing: 4px;
     }
     .inverted {
-        background-color: orange;
+        background-color: burlywood;
         top: 0px;
         border-bottom: 1px solid #333;
     }
     .voicing {
-        background-color: dodgerblue;
+        background-color: palegreen;
         bottom: 0px;
         border-top: 1px solid #333;
     }
@@ -778,15 +779,17 @@
         font-style: italic;
         font-size: 14px;
         justify-content: center;
+        margin-top: 20px;
     }
     .scale-group {
-        margin: 4px;
+        margin: 10px;
         flex-wrap: wrap;
         justify-content: center;
     }
     .scale {
-        margin: 2px;
-        padding: 2px;
+        margin: 1px;
+        padding-left: 5px;
+        padding-right: 5px;
         flex-wrap: wrap;
         white-space: nowrap;
     }    
