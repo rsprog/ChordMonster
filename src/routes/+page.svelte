@@ -557,23 +557,26 @@
                 </div>            
 
                 <h4>About</h4>
-                <p id="about">
-                    Start playing notes using your USB-connected MIDI device or computer keyboard. 
+                <p>
+                    Start playing notes using your connected MIDI device or computer keyboard. 
+                    MIDI device support requries Chrome, Edge, Firefox or Opera browser. 
                     If you play a triad or a seventh chord, in either root or inverted position, it will be identified and relevant scales shown where applicable. 
                     Chords in open position and/or with doubled notes will also be identified where possible. 
                     Note that not every chord and scale is spported at this time. 
                     Send any feedback to support@chord.monster                    
                 </p>
                 <h4>Keyboard shortcuts</h4>
-                <p id="keymap">
-                    Press INSERT to toggle whether or not the notes stay on the screen once the keys are released. 
-                    Press DELETE to remove any notes from the screen and CTRL+DELETE to clear notes and history. 
-                    Press BACKSPACE to delete last note entered. 
-                    Press SPACEBAR to toggle history view of previously played notes and chords.<br /><br />
-                    MIDI device support requries Chrome, Edge, Firefox or Opera browser. 
-                    If not using a MIDI device, use numeric keys to set octave and use the following letters to enter notes:<br />
-                    A = C, W = C#, S = D, E = D#, D = E, F = F, T = F#, G = G, Y = G#, H = A, U = A#, J = B, K = C, O = C#, L = D, P = D#
+                <p>
+                    Press <strong>INSERT</strong> to toggle whether or not the notes stay on the screen once the keys are released. 
+                    Press <strong>DELETE</strong> to remove any notes from the screen and <strong>CTRL+DELETE</strong> to clear notes and history. 
+                    Press <strong>BACKSPACE</strong> to delete last note entered. 
+                    Press <strong>SPACEBAR</strong> to toggle history view of previously played notes and chords.<br /><br />
+                    If not using a MIDI device, use numeric keys to set the octave and use the following letter keys to enter notes:
                 </p>
+                <div id="keymap">
+                    <div>A 🡢 C</div><div>W 🡢 C♯</div><div>S 🡢 D</div><div>E 🡢 D♯</div><div>D 🡢 E</div><div>F 🡢 F</div><div>T 🡢 F♯</div><div>G 🡢 G</div>
+                    <div>Y 🡢 G♯</div><div>H 🡢 A</div><div>U 🡢 A♯</div><div>J 🡢 B</div><div>K 🡢 C</div><div>O 🡢 C♯</div><div>L 🡢 D</div><div>P 🡢 D♯</div>
+                </div>
             </div>
             {/if}
             {#each currentNotes as note}
@@ -624,6 +627,7 @@
 </main>
 
 <style>
+
     :global(body) {
         background-color: #333;
         color: white;
@@ -639,10 +643,10 @@
     #logo {
         text-align: center;
         font-size: 22px;
-        font-family: monospace;
+        font-family: 'Source Code Pro', monospace;
         margin: 20px 0px 40px 0px;
         padding: 5x;
-        color: lawngreen;
+        color: orange;
         letter-spacing: 4px;
         font-style: normal;        
     }
@@ -665,6 +669,22 @@
         box-shadow: 0px 1px 2px 2px black;
         font-style: italic;
         max-width: 600px;
+    }
+    #keymap {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        justify-content: center;
+        margin-bottom: 20px;
+        font-weight: 800;
+        font-style: normal;
+    }
+    #keymap div {
+        color: black;
+        background-color: #CCC;
+        margin: 2px;
+        width: 70px;
+        text-align: center;
     }
     .info h4 {
         text-align: center;
@@ -777,7 +797,7 @@
         white-space: nowrap;
     }    
     .scale-key {
-        color: lawngreen;
+        color: orange;
     }
     .scale-degree {
         color: white;
