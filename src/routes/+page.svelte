@@ -578,8 +578,7 @@
             {/if}
             {#each currentNotes as note}
                 <div class="item note {note.isSharp ? 'black-key' : 'white-key'} {note.isDuplicated ? 'dup-note' : ''}">
-                    {note.name}
-                    <sub class="octave">{note.octave}</sub>
+                    {note.name}<sub class="octave">{note.octave}</sub>
                 </div>
             {/each}
 
@@ -684,6 +683,7 @@
         padding: 4px;
         text-align: center;
         height: 70px;
+        line-height: 70px;
     }
     .note {
         width: 100px;
@@ -712,6 +712,7 @@
     .chord-info {
         color: black;        
         height: 10px;
+        line-height: 10px;
         font-size: 9px;
         position: absolute;
         left: 0px;
