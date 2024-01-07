@@ -700,7 +700,7 @@
         background-color: black;
     }
     .octave {
-        font-size: 50px;
+        font-size: 25px;
         opacity: 70%;
     }
     .chord {
