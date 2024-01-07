@@ -165,11 +165,11 @@
 
     function onKeyDown(event) {
         if (!event.repeat) {
-            if (event.keyCode === 45) { // insert
+            if (event.code === 'Insert') {
                 event.preventDefault();
                 insertMode = !insertMode;
             }
-            else if (event.keyCode === 46) { // delete
+            else if (event.code === 'Delete') {
                 event.preventDefault();
                 notesMap.clear();
                 currentChord = null;
@@ -180,7 +180,7 @@
                     allChords = [];
                 }
             }
-            else if (event.keyCode === 8) { // backspace
+            else if (event.code === 'Backspace') {
                 event.preventDefault();
                 if (notesMap.size > 0) {
                     const lastEntryKey = [...notesMap.keys()].pop();
@@ -189,18 +189,18 @@
                     identifyChord();
                 }
             }
-            else if (event.keyCode === 32) { // spacebar
+            else if (event.code === 'Space') {
                 event.preventDefault();
                 showHistory = !showHistory;
             }
             else { // handle notes and octave changes
-                const midiNoteNumber = keyCodeToMIDINote(event.keyCode);
+                const midiNoteNumber = keyCodeToMIDINote(event.code);
                 if (midiNoteNumber) {
                     event.preventDefault();
                     handleNoteOn(midiNoteNumber);
                 }
                 else {
-                    const octaveNumber = keyCodeToOctave(event.keyCode);
+                    const octaveNumber = keyCodeToOctave(event.key);
                     if (octaveNumber) {
                         event.preventDefault();
                         octave = octaveNumber;
@@ -212,7 +212,7 @@
 
     function onKeyUp(event) {
         if (!event.repeat) {
-            const midiNoteNumber = keyCodeToMIDINote(event.keyCode);
+            const midiNoteNumber = keyCodeToMIDINote(event.code);
             if (midiNoteNumber) {
                 event.preventDefault();
                handleNoteOff(midiNoteNumber);
@@ -441,36 +441,30 @@
 
     function keyCodeToMIDINote(keyCode) {
         const keyMap = {
-            65: 12, // A -> C
-            87: 13, // W -> C#
-            83: 14, // S -> D
-            69: 15, // E -> D#
-            68: 16, // D -> E
-            70: 17, // F -> F
-            84: 18, // T -> F#
-            71: 19, // G -> G
-            89: 20, // Y -> G#
-            72: 21, // H -> A
-            85: 22, // U -> A#
-            74: 23, // J -> B
-            75: 24, // K -> C
-            79: 25, // O -> C#
-            76: 26, // L -> D
-            80: 27, // P -> D#
+            'KeyA': 12, // A -> C
+            'KeyW': 13, // W -> C#
+            'KeyS': 14, // S -> D
+            'KeyE': 15, // E -> D#
+            'KeyD': 16, // D -> E
+            'KeyF': 17, // F -> F
+            'KeyT': 18, // T -> F#
+            'KeyG': 19, // G -> G
+            'KeyY': 20, // Y -> G#
+            'KeyH': 21, // H -> A
+            'KeyU': 22, // U -> A#
+            'KeyJ': 23, // J -> B
+            'KeyK': 24, // K -> C
+            'KeyO': 25, // O -> C#
+            'KeyL': 26, // L -> D
+            'KeyP': 27, // P -> D#
         };
         const midiNote = keyMap[keyCode] + (octave * 12) || null;
         return midiNote;
     }
 
-    function keyCodeToOctave(keyCode) {
-        // allow only digits 1-9 (both normal and numpad)
-        if (keyCode >= 49 && keyCode <= 57) {
-            return keyCode - 48;
-        }
-        if (keyCode >= 97 && keyCode <= 105) {
-            return keyCode - 96;
-        }
-        return null;
+    function keyCodeToOctave(key) {
+        const val = parseInt(key);
+        return val > 0 && val < 10 ? val : null;
     }
 
     function getChordScales(chord) {
@@ -570,7 +564,7 @@
                     Press <strong>INSERT</strong> to toggle whether or not the notes stay on the screen once the keys are released. 
                     Press <strong>DELETE</strong> to remove any notes from the screen and <strong>CTRL+DELETE</strong> to clear notes and history. 
                     Press <strong>BACKSPACE</strong> to delete last note entered. 
-                    Press <strong>SPACEBAR</strong> to toggle history view of previously played notes and chords.<br /><br />
+                    Press <strong>SPACE</strong> to toggle history view of previously played notes and chords.<br /><br />
                     If not using a MIDI device, use numeric keys to set the octave and use the following letter keys to enter notes:
                 </p>
                 <div id="keymap">
