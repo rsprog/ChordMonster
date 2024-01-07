@@ -30,6 +30,7 @@
             this.index = index;
             this.octave = octave;
         }
+        isDuplicated = false;
         get noteWithOctave() {
             return this.name + this.octave;
         }
@@ -267,7 +268,12 @@
     
     function getCurrentNotes()
     {
-        return [...notesMap].map(([k,v]) => v).toSorted((a,b) => a.number-b.number);
+        const notes = [...notesMap].map(([k,v]) => v).toSorted((a,b) => a.number-b.number);
+        for (let i=0; i<notes.length; i++) {
+            notes[i].isDuplicated = notes.slice(0, i).map(v => v.index).includes(notes[i].index);
+        }
+        return notes;
+
     }    
 
     function getKnownChord(noteNumbers) {
@@ -571,7 +577,10 @@
             </div>
             {/if}
             {#each currentNotes as note}
-                <div class="item note {note.isSharp ? 'black-key' : 'white-key'}">{note.name}<sub class="octave">{note.octave}</sub></div>
+                <div class="item note {note.isSharp ? 'black-key' : 'white-key'} {note.isDuplicated ? 'dup-note' : ''}">
+                    {note.name}
+                    <sub class="octave">{note.octave}</sub>
+                </div>
             {/each}
 
             {#if currentChord}
@@ -678,7 +687,10 @@
     }
     .note {
         width: 100px;
-    }    
+    }
+    .dup-note {
+        opacity: 50%;
+    }
     .white-key {
         color: black;
         background-color: white;
