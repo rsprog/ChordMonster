@@ -555,11 +555,11 @@
                 <h4>About</h4>
                 <p>
                     Start playing notes using your connected MIDI device or computer keyboard. 
-                    MIDI device support requires Chrome, Edge, Firefox or Opera browser. 
-                    If you play a triad or a seventh chord, in either root or inverted position, it will be identified and relevant scales shown where applicable. 
+                    If you play a triad or a seventh chord, in either root or inverted position, it will be identified and relevant scales shown. 
                     Chords in open position and/or with doubled notes will also be identified where possible. 
                     Note that not every chord and scale is supported at this time. 
-                    Send any feedback to support@chord.monster                    
+                    Send any feedback to 
+                    <span>support@</span><span style="display:none">foobar.com</span><span>chord.monster</span>
                 </p>
                 <h4>Keyboard shortcuts</h4>
                 <p>
