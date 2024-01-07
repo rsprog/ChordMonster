@@ -4,22 +4,23 @@
 
     const noteNames = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
 
-    const chordTypes = {
-        'maj': {symbol: '', dom: true},
-        'min': {symbol: '', dom: false},
-        'aug': {symbol: '⁺', dom: true},        
-        'dim': {symbol: '°', dom: false},
-        'sus2': {symbol: 'sus2', dom: true},
-        'sus4': {symbol: 'sus4', dom: true},
-        'maj7': {symbol: '⁷', dom: true},
-        'min7': {symbol: '⁷', dom: false},
-        'dom7': {symbol: '⁷', dom: true},
-        'dim7': {symbol: '°⁷', dom: false},        
-        'min7♭5': {symbol: 'ø⁷', dom: false},
-        'maj7♯5': {symbol: '⁺⁷', dom: true},
-        'minMaj7': {symbol: '⁷', dom: false},
-        '7sus2': {symbol: '⁷sus2', dom: true},
-        '7sus4': {symbol: '⁷sus4', dom: true},
+    // below symbols are appended to roman numerals shown in scales, while notation is shown in the chord tile
+    const chordTypes = {        
+        'maj': {symbol: '', notation:'', dom: true}, // major triad
+        'min': {symbol: '', notation:'m', dom: false}, // minor triad
+        'aug': {symbol: '⁺', notation:'aug', dom: true}, // augmented triad
+        'dim': {symbol: '°', notation:'dim', dom: false}, // diminished triad
+        'sus2': {symbol: 'sus2', notation:'sus2', dom: true}, // second suspended triad
+        'sus4': {symbol: 'sus4', notation:'sus4', dom: true}, // fourth suspended triad
+        'maj7': {symbol: '⁷', notation:'7', dom: true}, // major seventh
+        'min7': {symbol: '⁷', notation:'m7', dom: false}, // minor seventh
+        'dom7': {symbol: '⁷', notation:'dom7', dom: true}, // dominant seventh
+        'dim7': {symbol: '°⁷', notation:'dim7', dom: false}, // diminished seventh
+        'min7♭5': {symbol: 'ø⁷', notation:'m7♭5', dom: false}, // half-diminished seventh
+        'maj7♯5': {symbol: '⁺⁷', notation:'7♯5', dom: true}, // augmented seventh
+        'minMaj7': {symbol: 'ᴹ⁷', notation:'mM7', dom: false}, // minor major seventh
+        '7sus2': {symbol: '⁷sus2', notation:'7sus2', dom: true}, // second suspended seventh
+        '7sus4': {symbol: '⁷sus4', notation:'7sus4', dom: true}, // fourth suspended seventh
     };
 
     class Note {
@@ -356,7 +357,7 @@
             if (c.intervals.every((value, index) => value === intervals[index])) {
                 const rootNoteName = getNote(sortedNotes[c.rootIndex]).name;
                 const bassNoteName = c.rootIndex === 0 ? rootNoteName : getNote(sortedNotes[0]).name;
-                let chordName = rootNoteName + c.format;
+                let chordName = rootNoteName + chordTypes[c.format].notation;
                 if (bassNoteName !== rootNoteName)
                     chordName += '/' + bassNoteName;
                 chord = new Chord(chordName, sortedNotes, c.rootIndex, chordTypes[c.format]);
@@ -496,10 +497,7 @@
                 <p id="about">
                     Start playing notes using your USB-connected MIDI device or computer keyboard. 
                     If you play a triad or a seventh chord, in either root or inverted position, it will be identified and relevant scales shown where applicable. 
-                    Note that not every chord and scale is spported at this time.
-                </p>
-                <p>
-                    Direct any feedback to support@chord.monster
+                    Note that not every chord and scale is spported at this time. Direct any feedback to support@chord.monster                    
                 </p>
                 <h4>Keyboard shortcuts</h4>
                 <p id="keymap">
@@ -563,7 +561,7 @@
         margin-bottom: 10px;
         padding: 4px;
         border-bottom: 2px solid #555;
-        text-align: left;
+        text-align: center;
         color: #CCC;
         font-size: 14px;
     }
@@ -595,6 +593,7 @@
         border: 1px solid white;
         box-shadow: 0px 1px 2px 2px black;
         font-style: italic;
+        max-width: 600px;
     }
     .info h4 {
         text-align: center;
@@ -605,6 +604,7 @@
         flex-wrap: wrap;
         width: 70%;
         height: 100%;
+        justify-content: center;
     }
     .item {
         font-size: 50px;
@@ -679,10 +679,12 @@
         flex-direction: column;
         font-style: italic;
         font-size: 14px;
+        justify-content: center;
     }
     .scale-group {
         margin: 4px;
-        flex-wrap: wrap;        
+        flex-wrap: wrap;
+        justify-content: center;
     }
     .scale {
         margin: 2px;
