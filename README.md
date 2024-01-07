@@ -2,4 +2,4 @@ This web app enables identification of notes and chords being played on a MIDI d
 
 The Web MIDI API is used to enable reading input from a MIDI device (i.e. piano keyboard).
 
-Alternatley, users can enter notes via the computer keybnoard.
+Alternately, users can enter notes via the computer keyboard.

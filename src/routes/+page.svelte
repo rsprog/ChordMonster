@@ -470,9 +470,9 @@
     function getChordScales(chord) {
         const scales = {
             "Major": [2, 2, 1, 2, 2, 2, 1],           // natural major scale
-            "Minor": [2, 1, 2, 2, 1, 2, 2],           // matural minor scale
+            "Minor": [2, 1, 2, 2, 1, 2, 2],           // natural minor scale
             "Harmonic Major": [2, 2, 1, 2, 1, 3, 1],  // harmonic major scale
-            "Harmonic Minor": [2, 1, 2, 2, 1, 3, 1],  // harmonic minro scale
+            "Harmonic Minor": [2, 1, 2, 2, 1, 3, 1],  // harmonic minor scale
             "Melodic Major": [2, 2, 1, 2, 1, 2, 2],   // melodic major scale
             "Melodic Minor": [2, 1, 2, 2, 2, 2, 1],   // melodic minor scale
         };
@@ -553,10 +553,10 @@
                 <h4>About</h4>
                 <p>
                     Start playing notes using your connected MIDI device or computer keyboard. 
-                    MIDI device support requries Chrome, Edge, Firefox or Opera browser. 
+                    MIDI device support requires Chrome, Edge, Firefox or Opera browser. 
                     If you play a triad or a seventh chord, in either root or inverted position, it will be identified and relevant scales shown where applicable. 
                     Chords in open position and/or with doubled notes will also be identified where possible. 
-                    Note that not every chord and scale is spported at this time. 
+                    Note that not every chord and scale is supported at this time. 
                     Send any feedback to support@chord.monster                    
                 </p>
                 <h4>Keyboard shortcuts</h4>
