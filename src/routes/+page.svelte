@@ -39,11 +39,13 @@
     }
 
     class Chord {
-        constructor(name, notes, rootIndex, chordType) {
-            this.name = name;
-            this.notes = notes;
-            this.rootIndex = rootIndex;
-            this.chordType = chordType;
+        constructor(name, notes, rootIndex, chordType, isVoicing, containsDoubledNotes) {
+            this.name = name; // formatted name, including the root note (and bass note for inverted chords)
+            this.notes = notes; // array of sorted midi numbers
+            this.rootIndex = rootIndex; // index of the root note within the notes array
+            this.chordType = chordType; // chord type
+            this.isVoicing = isVoicing; // indicates if this chord is open or contains doubled notes
+            this.containsDoubledNotes = containsDoubledNotes; // indicates if this chord contains doubled notes
         }
         get isInverted() {
             return this.rootIndex > 0;
@@ -240,15 +242,17 @@
     {        
         currentChord = null;
         currentScales = [];
-        let chord = null;
         const noteNumbers = [...notesMap].map(([k,v]) => v.number);
-        if (noteNumbers.length === 4) {
-            chord = getTetradChord(noteNumbers);
+    
+        // check for any known chords or their inversions
+        let chord = getKnownChord(noteNumbers);
+
+        // check if its a voicing (chord in open position) of any of the known chords or their inversions
+        if (!chord && noteNumbers.length > 2) {
+            chord = getChordFromVoicing(noteNumbers);
         }
-        else if (noteNumbers.length === 3) {
-            chord = getTriadChord(noteNumbers);
-        }
-        if (chord) {
+
+        if (chord) {            
             currentChord = chord;
             allChords = [...allChords, chord.name];
             currentScales = getChordScales(chord);
@@ -265,6 +269,60 @@
     {
         return [...notesMap].map(([k,v]) => v).toSorted((a,b) => a.number-b.number);
     }    
+
+    function getKnownChord(noteNumbers) {
+        if (noteNumbers.length === 4) {
+            // check if its a known seventh chord or its inversion
+            return getTetradChord(noteNumbers);
+        }
+        else if (noteNumbers.length === 3) {
+             // check if its a known triad or its inversion
+            return getTriadChord(noteNumbers);
+        }
+    }
+
+    function getChordFromVoicing(midiNotes) {
+        const sortedNotes = midiNotes.toSorted((a, b) => a - b);
+        // remove duplicates of same notes at different octaves, if any
+        const uniqueNotes = [...new Map(sortedNotes.map((x) => [x % 12, x]))].map(([k,v]) => v);
+        // we don't know the root note of the chord, so have to assume any note could be root
+        for (let i=0; i<uniqueNotes.length; i++) {
+            // transpose all notes into the lowest octave
+            const transposedNotes = transposeToLowestOctave(uniqueNotes, i);
+            let chord = getKnownChord(transposedNotes);
+            if (chord) {
+                chord.isVoicing = true;
+                chord.containsDoubledNotes = uniqueNotes.length < midiNotes.length;
+                return chord;
+            }
+        }
+        return null;
+    }
+
+    function getNoteInLowestOctave(midiNote) {
+        const noteIndex = midiNote % 12;
+        const multiplier = noteIndex < 9 ? 2 : 1; // because first 3 notes (A0, A#0, B0) appear before octave 1
+        return noteIndex + (12 * multiplier);
+    }
+
+    // get shortest ascending interval between two notes
+    function getShortestInterval(fromMidiNote, toMidiNote) {
+        const fromNoteIndex = fromMidiNote % 12;
+        const toNoteIndex = toMidiNote % 12;
+        const interval = toNoteIndex - fromNoteIndex;
+        return interval < 0 ? interval + 12 : interval;
+    }
+
+    // returns the provided notes in the lowest octave, removing any duplicates
+    function transposeToLowestOctave(midiNotes, rootIndex) {
+        const transposedNotes = [getNoteInLowestOctave(midiNotes[rootIndex])];
+        const remainingNotes = midiNotes.toSpliced(rootIndex, 1);
+        for (let i=0; i<remainingNotes.length; i++) {
+            const shortestInterval = getShortestInterval(transposedNotes[i], remainingNotes[i]);
+            transposedNotes.push(transposedNotes[i] + shortestInterval);
+        }
+        return transposedNotes;
+    }
 
     function getTriadChord(midiNotes) {
 
@@ -345,7 +403,6 @@
 
         return getChord(midiNotes, tetrads);
     }
-
 
     function getChord(midiNotes, chords) {
 
@@ -497,7 +554,9 @@
                 <p id="about">
                     Start playing notes using your USB-connected MIDI device or computer keyboard. 
                     If you play a triad or a seventh chord, in either root or inverted position, it will be identified and relevant scales shown where applicable. 
-                    Note that not every chord and scale is spported at this time. Direct any feedback to support@chord.monster                    
+                    Chords in open position and/or with doubled notes will also be identified where possible. 
+                    Note that not every chord and scale is spported at this time. 
+                    Send any feedback to support@chord.monster                    
                 </p>
                 <h4>Keyboard shortcuts</h4>
                 <p id="keymap">
@@ -516,9 +575,13 @@
             {/each}
 
             {#if currentChord}
-                <div class="item chord {currentChord.isInverted ? 'inverted' : ''}">{currentChord.name}
-                    {#if currentChord.inversionNumber > 0}
-                        <div class="inversion-number">{currentChord.inversionNumber}</div>
+                <div class="item chord">
+                    {#if currentChord.isInverted}
+                        <div class="chord-info inverted">inversion {currentChord.inversionNumber}</div>
+                    {/if}
+                    {currentChord.name}
+                    {#if currentChord.isVoicing}
+                        <div class="chord-info voicing">{currentChord.containsDoubledNotes ? 'doubled' : 'open' }</div>
                     {/if}
                 </div>
             {/if}
@@ -632,21 +695,28 @@
         color: white;
         background-color: green;
         min-width: 216px;
-    }
-    .inverted {
-        color: black;
-        background-color: #db7fff;
         position: relative;
     }
-    .inversion-number {
+    .chord-info {
+        color: black;        
+        height: 10px;
+        font-size: 9px;
         position: absolute;
-        top: 0px;
         left: 0px;
-        font-size: 10px;
-        margin: 2px;
-        padding: 2px;
-        width: 15px;
-        height: 15px;
+        width: 100%;
+        text-transform: uppercase;
+        font-weight: 800;
+        letter-spacing: 4px;
+    }
+    .inverted {
+        background-color: orange;
+        top: 0px;
+        border-bottom: 1px solid #333;
+    }
+    .voicing {
+        background-color: dodgerblue;
+        bottom: 0px;
+        border-top: 1px solid #333;
     }
     .sidebar {
         display: flex;
