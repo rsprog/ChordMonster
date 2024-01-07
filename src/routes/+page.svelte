@@ -574,8 +574,8 @@
                     If not using a MIDI device, use numeric keys to set the octave and use the following letter keys to enter notes:
                 </p>
                 <div id="keymap">
-                    <div>A 🡢 C</div><div>W 🡢 C♯</div><div>S 🡢 D</div><div>E 🡢 D♯</div><div>D 🡢 E</div><div>F 🡢 F</div><div>T 🡢 F♯</div><div>G 🡢 G</div>
-                    <div>Y 🡢 G♯</div><div>H 🡢 A</div><div>U 🡢 A♯</div><div>J 🡢 B</div><div>K 🡢 C</div><div>O 🡢 C♯</div><div>L 🡢 D</div><div>P 🡢 D♯</div>
+                    <div>A &gt; C</div><div>W &gt; C♯</div><div>S &gt; D</div><div>E &gt; D♯</div><div>D &gt; E</div><div>F &gt; F</div><div>T &gt; F♯</div><div>G &gt; G</div>
+                    <div>Y &gt; G♯</div><div>H &gt; A</div><div>U &gt; A♯</div><div>J &gt; B</div><div>K &gt; C</div><div>O &gt; C♯</div><div>L &gt; D</div><div>P &gt; D♯</div>
                 </div>
             </div>
             {/if}
