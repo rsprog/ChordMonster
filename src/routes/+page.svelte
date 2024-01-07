@@ -569,12 +569,12 @@
     }
     #logo {
         text-align: center;
-        font-size: 34px;
+        font-size: 22px;
         font-family: monospace;
         margin: 20px 0px 40px 0px;
         padding: 5x;
         color: lawngreen;
-        letter-spacing: 8px;
+        letter-spacing: 4px;
         font-style: normal;        
     }
     .flex-container {
@@ -586,7 +586,7 @@
         flex: 1;
         text-align: left;
         font-size: 16px;
-        line-height: 28px;
+        line-height: 24px;
         margin: 5px;
         padding-left: 20px;
         padding-right: 20px;
@@ -607,14 +607,14 @@
         height: 100%;
     }
     .item {
-        font-size: 100px;
+        font-size: 50px;
         margin: 4px;
         padding: 4px;
         text-align: center;
-        height: 120px;
+        height: 70px;
     }
     .note {
-        width: 180px;
+        width: 100px;
     }    
     .white-key {
         color: black;
@@ -631,7 +631,7 @@
     .chord {
         color: white;
         background-color: green;
-        min-width: 376px;
+        min-width: 216px;
     }
     .inverted {
         color: black;
@@ -642,7 +642,7 @@
         position: absolute;
         top: 0px;
         left: 0px;
-        font-size: 20px;
+        font-size: 10px;
         margin: 2px;
         padding: 2px;
         width: 15px;
@@ -678,7 +678,7 @@
     .scales {
         flex-direction: column;
         font-style: italic;
-        font-size: 20px;
+        font-size: 14px;
     }
     .scale-group {
         margin: 4px;
@@ -695,30 +695,12 @@
     }
     .scale-degree {
         color: white;
-        font-size: 18px;
+        font-size: 12px;
     }
     .break {
         flex-basis: 100%;
         height: 0;
     }
-    @media screen and (max-width: 600px) {
-        .item {
-            font-size: 50px;
-            height: 60px;            
-        }
-        .note {
-            width: 90px;
-        }           
-        .chord {
-            min-width: 196px;
-        }
-        .scales {
-            font-size: 14px;
-        }
-        .scale-degree {
-            font-size: 12px;
-        }
-    }    
 </style>
 
 <svelte:window on:keydown={onKeyDown} on:keyup={onKeyUp} />
