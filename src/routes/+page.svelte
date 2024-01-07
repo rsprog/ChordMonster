@@ -667,13 +667,14 @@
         padding: 1px;
         font-size: 12px;
         font-family: monospace;
-        text-align: left;        
     }
     .small-note {
         width: 40px;
+        text-align: left;        
     }
     .small-chord {
-        width: 100px;
+        width: 80px;
+        text-align: right;
     }
     .scales {
         flex-direction: column;
