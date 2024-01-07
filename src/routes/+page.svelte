@@ -114,6 +114,8 @@
     let insertMode = false;
     let infoTextVisible = true;
     let showHistory = false;
+    let notesToKeep = 500; // how many entered notes to keep in history
+    let chordsToKeep = 250; // how many entered chords to keep in history
 
     function onMIDISuccess(midiAccess) {
         midiAccess.onstatechange = onMIDIStateChange;
@@ -225,7 +227,7 @@
         const note = getNote(midiNoteNumber);
         notesMap.set(midiNoteNumber, note);
         currentNotes = getCurrentNotes();
-        allNotes = [...allNotes, note.noteWithOctave];
+        allNotes = [...allNotes, note.noteWithOctave].slice(-notesToKeep);
         identifyChord();
         infoTextVisible = false;
     }
@@ -255,7 +257,7 @@
 
         if (chord) {            
             currentChord = chord;
-            allChords = [...allChords, chord.name];
+            allChords = [...allChords, chord.name].slice(-chordsToKeep);
             currentScales = getChordScales(chord);
         }
     }
