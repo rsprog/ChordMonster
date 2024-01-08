@@ -1,45 +1,27 @@
 export const noteNames = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
 
-// below symbols are appended to roman numerals shown in scales, while notation is shown in the chord tile
-export const chordTypes = {        
-    'maj': {symbol: '', notation:'', dom: true},                // major triad
-    'min': {symbol: '', notation:'m', dom: false},              // minor triad
-    'dim': {symbol: '°', notation:'dim', dom: false},           // diminished triad    
-    'aug': {symbol: '⁺', notation:'aug', dom: true},            // augmented triad
-    'sus2': {symbol: 'sus2', notation:'sus2', dom: true},       // second suspended triad
-    'sus4': {symbol: 'sus4', notation:'sus4', dom: true},       // fourth suspended triad
-    'maj7': {symbol: '⁷', notation:'7', dom: true},             // major seventh
-    'min7': {symbol: '⁷', notation:'m7', dom: false},           // minor seventh
-    'dom7': {symbol: '⁷', notation:'dom7', dom: true},          // dominant seventh
-    'dim7': {symbol: '°⁷', notation:'dim7', dom: false},        // diminished seventh
-    'min7b5': {symbol: 'ø⁷', notation:'m7♭5', dom: false},      // half-diminished seventh
-    'maj7#5': {symbol: '⁺⁷', notation:'7♯5', dom: true},        // augmented seventh
-    'minMaj7': {symbol: 'ᴹ⁷', notation:'mM7', dom: false},      // minor major seventh
-    '7sus2': {symbol: '⁷sus2', notation:'7sus2', dom: true},    // second suspended seventh
-    '7sus4': {symbol: '⁷sus4', notation:'7sus4', dom: true},    // fourth suspended seventh
+// known chords
+// below symbols are appended to roman numerals shown in scales, while notation is shown in the chord tiles
+export const chordTypes = {
+    'maj': {intervals: [4, 3], symbol: '', notation:'', dom: true},                   // major triad
+    'min': {intervals: [3, 4], symbol: '', notation:'m', dom: false},                 // minor triad
+    'dim': {intervals: [3, 3], symbol: '°', notation:'dim', dom: false},              // diminished triad    
+    'aug': {intervals: [4, 4], symbol: '⁺', notation:'aug', dom: true},               // augmented triad
+    'sus2': {intervals: [2, 5], symbol: 'sus2', notation:'sus2', dom: true},          // second suspended triad
+    'sus4': {intervals: [5, 2], symbol: 'sus4', notation:'sus4', dom: true},          // fourth suspended triad
+    'maj7': {intervals: [4, 3, 4], symbol: '⁷', notation:'7', dom: true},             // major seventh
+    'min7': {intervals: [3, 4, 3], symbol: '⁷', notation:'m7', dom: false},           // minor seventh
+    'dom7': {intervals: [4, 3, 3], symbol: '⁷', notation:'dom7', dom: true},          // dominant seventh
+    'dim7': {intervals: [3, 3, 3], symbol: '°⁷', notation:'dim7', dom: false},        // diminished seventh
+    'min7b5': {intervals: [3, 3, 4], symbol: 'ø⁷', notation:'m7♭5', dom: false},      // half-diminished seventh
+    'maj7#5': {intervals: [4, 4, 3], symbol: '⁺⁷', notation:'7♯5', dom: true},        // augmented seventh
+    'minMaj7': {intervals: [3, 4, 4], symbol: 'ᴹ⁷', notation:'mM7', dom: false},      // minor major seventh
+    '7sus2': {intervals: [2, 5, 3], symbol: '⁷sus2', notation:'7sus2', dom: true},    // second suspended seventh
+    '7sus4': {intervals: [5, 2, 3], symbol: '⁷sus4', notation:'7sus4', dom: true},    // fourth suspended seventh
 };
 
-// known chord intervals
-const chordIntervals = [
-    { intervals: [4, 3], format: 'maj' },           // Major triad chord
-    { intervals: [3, 4], format: 'min' },           // Minor triad chord
-    { intervals: [3, 3], format: 'dim' },           // Diminished triad chord
-    { intervals: [4, 4], format: 'aug' },           // Augmented triad chord
-    { intervals: [2, 5], format: 'sus2' },          // Suspended Second triad chord
-    { intervals: [5, 2], format: 'sus4' },          // Suspended Fourth triad chord
-    { intervals: [4, 3, 4], format: 'maj7' },       // Major seventh chord
-    { intervals: [3, 4, 3], format: 'min7' },       // Minor seventh chord
-    { intervals: [4, 3, 3], format: 'dom7' },       // Dominant seventh chord
-    { intervals: [3, 3, 3], format: 'dim7' },       // Diminished seventh chord
-    { intervals: [3, 3, 4], format: 'min7b5' },     // Half-Diminished seventh chord    
-    { intervals: [4, 4, 3], format: 'maj7#5' },     // Augmented seventh chord
-    { intervals: [3, 4, 4], format: 'minMaj7' },    // Minor-Major seventh chord
-    { intervals: [2, 5, 3], format: '7sus2' },      // Suspended second seventh chord
-    { intervals: [5, 2, 3], format: '7sus4' },      // Suspended fourth seventh chord
-];
-
 // known scales
-const scales = {
+export const scaleTypes = {
     "Major": [2, 2, 1, 2, 2, 2, 1],           // natural major scale
     "Minor": [2, 1, 2, 2, 1, 2, 2],           // natural minor scale
     "Harmonic Major": [2, 2, 1, 2, 1, 3, 1],  // harmonic major scale
@@ -155,9 +137,9 @@ export function getScales(chord) {
     const startIndex = 1 + (chordNotes.length - 2) * 2;
     const matched = [];
     
-    for (let scale in scales) {
+    for (let scale in scaleTypes) {
         const matchedScales = [];
-        const scaleIntervals = [...scales[scale], ...scales[scale].slice(0, startIndex)];
+        const scaleIntervals = [...scaleTypes[scale], ...scaleTypes[scale].slice(0, startIndex)];
         for (let i=startIndex; i<scaleIntervals.length; i++) {
             let intervals = [];
             for (let j=i-startIndex; j<i; j+=2) {
@@ -167,7 +149,7 @@ export function getScales(chord) {
                 // scale matched, now find in which key (or keys) the chord belongs
                 for (let k=0; k<noteNames.length; k++) {
                     let scaleNoteIndexes = [k];
-                    for (let x of scales[scale].slice(0, -1)) {
+                    for (let x of scaleTypes[scale].slice(0, -1)) {
                         scaleNoteIndexes.push((scaleNoteIndexes[scaleNoteIndexes.length - 1] + x) % 12);
                     }
                     if (chordNoteIndexes.every(val => scaleNoteIndexes.includes(val))) {
@@ -186,7 +168,6 @@ export function getScales(chord) {
     return matched;
 }
 
-// inverts the specified interval by one
 export function invertInterval(interval) {
     return [...interval.slice(-(interval.length - 1)), 12 - interval.reduce((a, c) => a + c)];
 }
@@ -239,6 +220,14 @@ function getKnownChord(midiNotes) {
     const sortedNotes = midiNotes.toSorted((a, b) => a - b);
     const intervals = getIntervals(sortedNotes);
 
+    const chordIntervals = Object.entries(chordTypes).map(([key, val], index) => ({
+        id: key,
+        intervals: val.intervals,
+        chordIndex: index,
+        rootIndex: 0,
+        inversion: 0,
+    }));
+
     if (!chordIntervals.some((value) => value.intervals.length === intervals.length))
         return null;
 
@@ -250,10 +239,10 @@ function getKnownChord(midiNotes) {
         if (c.intervals.length === intervals.length && c.intervals.every((value, index) => value === intervals[index])) {
             const rootNoteName = getNote(sortedNotes[c.rootIndex]).name;
             const bassNoteName = c.rootIndex === 0 ? rootNoteName : getNote(sortedNotes[0]).name;
-            let chordName = rootNoteName + chordTypes[c.format].notation;
+            let chordName = rootNoteName + chordTypes[c.id].notation;
             if (bassNoteName !== rootNoteName)
                 chordName += '/' + bassNoteName;
-            chord = new Chord(chordName, sortedNotes, c.rootIndex, chordTypes[c.format]);
+            chord = new Chord(chordName, sortedNotes, c.rootIndex, chordTypes[c.id]);
             break;
         }
     };
@@ -272,15 +261,12 @@ function getIntervals(sortedMidiNotes) {
 function appendInvertedChordIntervals(chordIntervals) {
     const invertedIntervals = [];
     for (const [index, c] of chordIntervals.entries()) {
-        c.chordIndex = index;
-        c.rootIndex = 0;
-        c.inversion = 0;
         let currentInterval = c.intervals;
         for (let i=0; i<c.intervals.length; i++) {
             const inverted = invertInterval(currentInterval);
             invertedIntervals.push({
                 intervals: inverted,
-                format: c.format,
+                id: c.id,
                 chordIndex: index,                
                 rootIndex: currentInterval.length-i,
                 inversion: i+1,
