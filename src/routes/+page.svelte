@@ -246,15 +246,7 @@
         currentChord = null;
         currentScales = [];
         const noteNumbers = [...notesMap].map(([k,v]) => v.number);
-    
-        // check for any known chords or their inversions
-        let chord = getKnownChord(noteNumbers);
-
-        // check if its a voicing (chord in open position) of any of the known chords or their inversions
-        if (!chord && noteNumbers.length > 2) {
-            chord = getChordFromVoicing(noteNumbers);
-        }
-
+        const chord = getKnownChordOrVoicing(noteNumbers);
         if (chord) {            
             currentChord = chord;
             allChords = [...allChords, chord.name].slice(-chordsToKeep);
@@ -275,8 +267,20 @@
             notes[i].isDuplicated = notes.slice(0, i).map(v => v.index).includes(notes[i].index);
         }
         return notes;
+    }
 
-    }    
+    function getKnownChordOrVoicing(noteNumbers) {
+
+        // check for any known chords or their inversions
+        let chord = getKnownChord(noteNumbers);
+
+        // check if its a voicing (chord in open position) of any of the known chords or their inversions
+        if (!chord && noteNumbers.length > 2) {
+            chord = getChordFromVoicing(noteNumbers);
+        }
+        
+        return chord;
+    }
 
     function getKnownChord(noteNumbers) {
         if (noteNumbers.length === 4) {
