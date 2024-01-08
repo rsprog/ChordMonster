@@ -1,7 +1,7 @@
-const noteNames = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+export const noteNames = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
 
 // below symbols are appended to roman numerals shown in scales, while notation is shown in the chord tile
-const chordTypes = {        
+export const chordTypes = {        
     'maj': {symbol: '', notation:'', dom: true}, // major triad
     'min': {symbol: '', notation:'m', dom: false}, // minor triad
     'aug': {symbol: '⁺', notation:'aug', dom: true}, // augmented triad
@@ -99,8 +99,11 @@ export class ScaleDegree {
 
 export function getNote(midiNoteNumber) {
     const octave = Math.floor(midiNoteNumber / 12) - 1;
-    const noteIndex = midiNoteNumber % 12;
-    return new Note(midiNoteNumber, noteNames[noteIndex], noteIndex, octave);
+    if (octave >= 0) {
+        const noteIndex = midiNoteNumber % 12;
+        return new Note(midiNoteNumber, noteNames[noteIndex], noteIndex, octave);
+    }
+    return null;
 }
 
 export function getChord(noteNumbers) {
