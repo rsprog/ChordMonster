@@ -2,21 +2,50 @@ export const noteNames = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯
 
 // below symbols are appended to roman numerals shown in scales, while notation is shown in the chord tile
 export const chordTypes = {        
-    'maj': {symbol: '', notation:'', dom: true}, // major triad
-    'min': {symbol: '', notation:'m', dom: false}, // minor triad
-    'aug': {symbol: '⁺', notation:'aug', dom: true}, // augmented triad
-    'dim': {symbol: '°', notation:'dim', dom: false}, // diminished triad
-    'sus2': {symbol: 'sus2', notation:'sus2', dom: true}, // second suspended triad
-    'sus4': {symbol: 'sus4', notation:'sus4', dom: true}, // fourth suspended triad
-    'maj7': {symbol: '⁷', notation:'7', dom: true}, // major seventh
-    'min7': {symbol: '⁷', notation:'m7', dom: false}, // minor seventh
-    'dom7': {symbol: '⁷', notation:'dom7', dom: true}, // dominant seventh
-    'dim7': {symbol: '°⁷', notation:'dim7', dom: false}, // diminished seventh
-    'min7♭5': {symbol: 'ø⁷', notation:'m7♭5', dom: false}, // half-diminished seventh
-    'maj7♯5': {symbol: '⁺⁷', notation:'7♯5', dom: true}, // augmented seventh
-    'minMaj7': {symbol: 'ᴹ⁷', notation:'mM7', dom: false}, // minor major seventh
-    '7sus2': {symbol: '⁷sus2', notation:'7sus2', dom: true}, // second suspended seventh
-    '7sus4': {symbol: '⁷sus4', notation:'7sus4', dom: true}, // fourth suspended seventh
+    'maj': {symbol: '', notation:'', dom: true},                // major triad
+    'min': {symbol: '', notation:'m', dom: false},              // minor triad
+    'dim': {symbol: '°', notation:'dim', dom: false},           // diminished triad    
+    'aug': {symbol: '⁺', notation:'aug', dom: true},            // augmented triad
+    'sus2': {symbol: 'sus2', notation:'sus2', dom: true},       // second suspended triad
+    'sus4': {symbol: 'sus4', notation:'sus4', dom: true},       // fourth suspended triad
+    'maj7': {symbol: '⁷', notation:'7', dom: true},             // major seventh
+    'min7': {symbol: '⁷', notation:'m7', dom: false},           // minor seventh
+    'dom7': {symbol: '⁷', notation:'dom7', dom: true},          // dominant seventh
+    'dim7': {symbol: '°⁷', notation:'dim7', dom: false},        // diminished seventh
+    'min7b5': {symbol: 'ø⁷', notation:'m7♭5', dom: false},      // half-diminished seventh
+    'maj7#5': {symbol: '⁺⁷', notation:'7♯5', dom: true},        // augmented seventh
+    'minMaj7': {symbol: 'ᴹ⁷', notation:'mM7', dom: false},      // minor major seventh
+    '7sus2': {symbol: '⁷sus2', notation:'7sus2', dom: true},    // second suspended seventh
+    '7sus4': {symbol: '⁷sus4', notation:'7sus4', dom: true},    // fourth suspended seventh
+};
+
+// known chord intervals
+const chordIntervals = [
+    { intervals: [4, 3], format: 'maj' },           // Major triad chord
+    { intervals: [3, 4], format: 'min' },           // Minor triad chord
+    { intervals: [3, 3], format: 'dim' },           // Diminished triad chord
+    { intervals: [4, 4], format: 'aug' },           // Augmented triad chord
+    { intervals: [2, 5], format: 'sus2' },          // Suspended Second triad chord
+    { intervals: [5, 2], format: 'sus4' },          // Suspended Fourth triad chord
+    { intervals: [4, 3, 4], format: 'maj7' },       // Major seventh chord
+    { intervals: [3, 4, 3], format: 'min7' },       // Minor seventh chord
+    { intervals: [4, 3, 3], format: 'dom7' },       // Dominant seventh chord
+    { intervals: [3, 3, 3], format: 'dim7' },       // Diminished seventh chord
+    { intervals: [3, 3, 4], format: 'min7b5' },     // Half-Diminished seventh chord    
+    { intervals: [4, 4, 3], format: 'maj7#5' },     // Augmented seventh chord
+    { intervals: [3, 4, 4], format: 'minMaj7' },    // Minor-Major seventh chord
+    { intervals: [2, 5, 3], format: '7sus2' },      // Suspended second seventh chord
+    { intervals: [5, 2, 3], format: '7sus4' },      // Suspended fourth seventh chord
+];
+
+// known scales
+const scales = {
+    "Major": [2, 2, 1, 2, 2, 2, 1],           // natural major scale
+    "Minor": [2, 1, 2, 2, 1, 2, 2],           // natural minor scale
+    "Harmonic Major": [2, 2, 1, 2, 1, 3, 1],  // harmonic major scale
+    "Harmonic Minor": [2, 1, 2, 2, 1, 3, 1],  // harmonic minor scale
+    "Melodic Major": [2, 2, 1, 2, 1, 2, 2],   // melodic major scale
+    "Melodic Minor": [2, 1, 2, 2, 2, 2, 1],   // melodic minor scale
 };
 
 export class Note {
@@ -120,14 +149,6 @@ export function getChord(noteNumbers) {
 }
 
 export function getScales(chord) {
-    const scales = {
-        "Major": [2, 2, 1, 2, 2, 2, 1],           // natural major scale
-        "Minor": [2, 1, 2, 2, 1, 2, 2],           // natural minor scale
-        "Harmonic Major": [2, 2, 1, 2, 1, 3, 1],  // harmonic major scale
-        "Harmonic Minor": [2, 1, 2, 2, 1, 3, 1],  // harmonic minor scale
-        "Melodic Major": [2, 2, 1, 2, 1, 2, 2],   // melodic major scale
-        "Melodic Minor": [2, 1, 2, 2, 2, 2, 1],   // melodic minor scale
-    };
     const chordNotes = chord.getParentNotes();
     const chordIntervals = getIntervals(chordNotes);
     const chordNoteIndexes = chordNotes.map(s => getNote(s).index);
@@ -168,17 +189,6 @@ export function getScales(chord) {
 // inverts the specified interval by one
 export function invertInterval(interval) {
     return [...interval.slice(-(interval.length - 1)), 12 - interval.reduce((a, c) => a + c)];
-}
-
-function getKnownChord(noteNumbers) {
-    if (noteNumbers.length === 4) {
-        // check if its a known seventh chord or its inversion
-        return getTetradChord(noteNumbers);
-    }
-    else if (noteNumbers.length === 3) {
-        // check if its a known triad or its inversion
-        return getTriadChord(noteNumbers);
-    }
 }
 
 function getChordFromVoicing(midiNotes) {
@@ -224,47 +234,14 @@ function transposeToLowestOctave(midiNotes, rootIndex) {
     return transposedNotes;
 }
 
-function getTriadChord(midiNotes) {
-
-    if (midiNotes.length !== 3)
-        return null;
-
-    const triads = [
-        { intervals: [3, 4], format: 'min' },  // Minor chord (root position)
-        { intervals: [4, 3], format: 'maj' },  // Major chord (root position)
-        { intervals: [3, 3], format: 'dim' },  // Diminished chord (root position)
-        { intervals: [4, 4], format: 'aug' },  // Augmented chord (root position)
-        { intervals: [2, 5], format: 'sus2' }, // Suspended Second chord (root position)
-        { intervals: [5, 2], format: 'sus4' }, // Suspended Fourth chord (root position)
-    ];
-
-    return getChordFromIntervals(midiNotes, triads);        
-}
-
-function getTetradChord(midiNotes) {
-
-    if (midiNotes.length !== 4)
-        return null;
-
-    const tetrads = [
-        { intervals: [4, 3, 4], format: 'maj7' },      // Major seventh chord (root position)
-        { intervals: [3, 4, 3], format: 'min7' },      // Minor seventh chord (root position)
-        { intervals: [4, 3, 3], format: 'dom7' },      // Dominant seventh chord (root position)
-        { intervals: [3, 3, 4], format: 'min7♭5' },    // Half-Diminished seventh chord (root position)
-        { intervals: [3, 3, 3], format: 'dim7' },      // Diminished seventh chord (root position)
-        { intervals: [3, 4, 4], format: 'minMaj7' },   // Minor-Major seventh chord (root position)
-        { intervals: [4, 4, 3], format: 'maj7♯5' },    // Augmented seventh chord (root position)
-        { intervals: [2, 5, 3], format: '7sus2' },     // Seventh suspended second chord (root position)
-        { intervals: [5, 2, 3], format: '7sus4' },     // Seventh suspended fourth chord (root position)
-    ];
-
-    return getChordFromIntervals(midiNotes, tetrads);
-}
-
-function getChordFromIntervals(midiNotes, chordIntervals) {
+function getKnownChord(midiNotes) {
 
     const sortedNotes = midiNotes.toSorted((a, b) => a - b);
     const intervals = getIntervals(sortedNotes);
+
+    if (!chordIntervals.some((value) => value.intervals.length === intervals.length))
+        return null;
+
     let chord = null;
     
     const allChordIntervals = appendInvertedChordIntervals(chordIntervals);
