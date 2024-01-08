@@ -150,7 +150,10 @@ export function getScales(chord) {
                         scaleNoteIndexes.push((scaleNoteIndexes[scaleNoteIndexes.length - 1] + x) % 12);
                     }
                     if (chordNoteIndexes.every(val => scaleNoteIndexes.includes(val))) {
-                        matchedScales.push(new ScaleDegree(new Scale(scale, k), scaleNoteIndexes.indexOf(chordNoteIndexes[0]) + 1, chord.chordType));
+                        matchedScales.push(new ScaleDegree(
+                            new Scale(scale, k),
+                            scaleNoteIndexes.indexOf(chordNoteIndexes[0]) + 1,
+                            chord.chordType));
                     }
                 }
                 matched.push(matchedScales);
@@ -160,6 +163,11 @@ export function getScales(chord) {
     }
 
     return matched;
+}
+
+// inverts the specified interval by one
+export function invertInterval(interval) {
+    return [...interval.slice(-(interval.length - 1)), 12 - interval.reduce((a, c) => a + c)];
 }
 
 function getKnownChord(noteNumbers) {
@@ -222,22 +230,12 @@ function getTriadChord(midiNotes) {
         return null;
 
     const triads = [
-        { intervals: [3, 4], rootIndex: 0, format: 'min' },  // Minor chord (root position)
-        { intervals: [4, 3], rootIndex: 0, format: 'maj' },  // Major chord (root position)
-        { intervals: [3, 3], rootIndex: 0, format: 'dim' },  // Diminished chord (root position)
-        { intervals: [4, 4], rootIndex: 0, format: 'aug' },  // Augmented chord (root position)
-        { intervals: [2, 5], rootIndex: 0, format: 'sus2' }, // Suspended Second chord (root position)
-        { intervals: [5, 2], rootIndex: 0, format: 'sus4' }, // Suspended Fourth chord (root position)
-
-        // First Inversions (duplicates omitted)
-        { intervals: [4, 5], rootIndex: 2, format: 'min' },  // Minor chord (first inversion)
-        { intervals: [3, 5], rootIndex: 2, format: 'maj' },  // Major chord (first inversion)
-        { intervals: [3, 6], rootIndex: 2, format: 'dim' },  // Diminished chord (first inversion)
-
-        // Second Inversions (duplicates omitted)
-        { intervals: [5, 3], rootIndex: 1, format: 'min' },  // Minor chord (second inversion)
-        { intervals: [5, 4], rootIndex: 1, format: 'maj' },  // Major chord (second inversion)
-        { intervals: [6, 3], rootIndex: 1, format: 'dim' },  // Diminished chord (second inversion)
+        { intervals: [3, 4], format: 'min' },  // Minor chord (root position)
+        { intervals: [4, 3], format: 'maj' },  // Major chord (root position)
+        { intervals: [3, 3], format: 'dim' },  // Diminished chord (root position)
+        { intervals: [4, 4], format: 'aug' },  // Augmented chord (root position)
+        { intervals: [2, 5], format: 'sus2' }, // Suspended Second chord (root position)
+        { intervals: [5, 2], format: 'sus4' }, // Suspended Fourth chord (root position)
     ];
 
     return getChordFromIntervals(midiNotes, triads);        
@@ -249,61 +247,30 @@ function getTetradChord(midiNotes) {
         return null;
 
     const tetrads = [
-        { intervals: [4, 3, 4], rootIndex: 0, format: 'maj7' },      // Major seventh chord (root position)
-        { intervals: [3, 4, 3], rootIndex: 0, format: 'min7' },      // Minor seventh chord (root position)
-        { intervals: [4, 3, 3], rootIndex: 0, format: 'dom7' },      // Dominant seventh chord (root position)
-        { intervals: [3, 3, 4], rootIndex: 0, format: 'min7♭5' },    // Half-Diminished seventh chord (root position)
-        { intervals: [3, 3, 3], rootIndex: 0, format: 'dim7' },      // Diminished seventh chord (root position)
-        { intervals: [3, 4, 4], rootIndex: 0, format: 'minMaj7' },   // Minor-Major seventh chord (root position)
-        { intervals: [4, 4, 3], rootIndex: 0, format: 'maj7♯5' },    // Augmented seventh chord (root position)
-        { intervals: [2, 5, 3], rootIndex: 0, format: '7sus2' },     // Seventh suspended second chord (root position)
-        { intervals: [5, 2, 3], rootIndex: 0, format: '7sus4' },     // Seventh suspended fourth chord (root position)
-
-        // First Inversions
-        { intervals: [3, 4, 1], rootIndex: 3, format: 'maj7' },      // Major seventh chord (first inversion)
-        { intervals: [4, 3, 2], rootIndex: 3, format: 'min7' },      // Minor seventh chord (first inversion)
-        { intervals: [3, 3, 2], rootIndex: 3, format: 'dom7' },      // Dominant seventh chord (first inversion)
-        { intervals: [3, 4, 2], rootIndex: 3, format: 'min7♭5' },    // Half-Diminished seventh chord (first inversion)
-        { intervals: [3, 3, 3], rootIndex: 3, format: 'dim7' },      // Diminished seventh chord (first inversion)
-        { intervals: [4, 4, 1], rootIndex: 3, format: 'minMaj7' },   // Minor-Major seventh chord (first inversion)
-        { intervals: [4, 3, 1], rootIndex: 3, format: 'maj7♯5' },    // Augmented seventh chord (first inversion)
-        { intervals: [5, 3, 2], rootIndex: 3, format: '7sus2' },     // Seventh suspended second chord (first inversion)
-        { intervals: [2, 3, 2], rootIndex: 3, format: '7sus4' },     // Seventh suspended fourth chord (first inversion)
-
-        // Second Inversions
-        { intervals: [4, 1, 4], rootIndex: 2, format: 'maj7' },      // Major seventh chord (second inversion)
-        { intervals: [3, 2, 3], rootIndex: 2, format: 'min7' },      // Minor seventh chord (second inversion)
-        { intervals: [3, 2, 4], rootIndex: 2, format: 'dom7' },      // Dominant seventh chord (second inversion)
-        { intervals: [4, 2, 3], rootIndex: 2, format: 'min7♭5' },    // Half-Diminished seventh chord (second inversion)
-        { intervals: [3, 3, 3], rootIndex: 2, format: 'dim7' },      // Diminished seventh chord (second inversion)
-        { intervals: [4, 1, 3], rootIndex: 2, format: 'minMaj7' },   // Minor-Major seventh chord (second inversion)
-        { intervals: [3, 1, 4], rootIndex: 2, format: 'maj7♯5' },    // Augmented seventh chord (second inversion)
-        { intervals: [3, 2, 2], rootIndex: 2, format: '7sus2' },     // Seventh suspended second chord (second inversion)
-        { intervals: [3, 2, 5], rootIndex: 2, format: '7sus4' },     // Seventh suspended fourth chord (second inversion)
-
-        // Third Inversions
-        { intervals: [1, 4, 3], rootIndex: 1, format: 'maj7' },      // Major seventh chord (third inversion)
-        { intervals: [2, 3, 4], rootIndex: 1, format: 'min7' },      // Minor seventh chord (third inversion)
-        { intervals: [2, 4, 3], rootIndex: 1, format: 'dom7' },      // Dominant seventh chord (third inversion)
-        { intervals: [2, 3, 3], rootIndex: 1, format: 'min7♭5' },    // Half-Diminished seventh chord (third inversion)
-        { intervals: [3, 3, 3], rootIndex: 1, format: 'dim7' },      // Diminished seventh chord (third inversion)
-        { intervals: [1, 3, 4], rootIndex: 1, format: 'minMaj7' },   // Minor-Major seventh chord (third inversion)
-        { intervals: [1, 4, 4], rootIndex: 1, format: 'maj7♯5' },    // Augmented seventh chord (third inversion)
-        { intervals: [2, 2, 5], rootIndex: 1, format: '7sus2' },     // Seventh suspended second chord (third inversion)
-        { intervals: [2, 5, 2], rootIndex: 1, format: '7sus4' },     // Seventh suspended fourth chord (third inversion)
+        { intervals: [4, 3, 4], format: 'maj7' },      // Major seventh chord (root position)
+        { intervals: [3, 4, 3], format: 'min7' },      // Minor seventh chord (root position)
+        { intervals: [4, 3, 3], format: 'dom7' },      // Dominant seventh chord (root position)
+        { intervals: [3, 3, 4], format: 'min7♭5' },    // Half-Diminished seventh chord (root position)
+        { intervals: [3, 3, 3], format: 'dim7' },      // Diminished seventh chord (root position)
+        { intervals: [3, 4, 4], format: 'minMaj7' },   // Minor-Major seventh chord (root position)
+        { intervals: [4, 4, 3], format: 'maj7♯5' },    // Augmented seventh chord (root position)
+        { intervals: [2, 5, 3], format: '7sus2' },     // Seventh suspended second chord (root position)
+        { intervals: [5, 2, 3], format: '7sus4' },     // Seventh suspended fourth chord (root position)
     ];
 
     return getChordFromIntervals(midiNotes, tetrads);
 }
 
-function getChordFromIntervals(midiNotes, chords) {
+function getChordFromIntervals(midiNotes, chordIntervals) {
 
     const sortedNotes = midiNotes.toSorted((a, b) => a - b);
     const intervals = getIntervals(sortedNotes);
     let chord = null;
     
-    for (let c of chords) {
-        if (c.intervals.every((value, index) => value === intervals[index])) {
+    const allChordIntervals = appendInvertedChordIntervals(chordIntervals);
+
+    for (let c of allChordIntervals) {
+        if (c.intervals.length === intervals.length && c.intervals.every((value, index) => value === intervals[index])) {
             const rootNoteName = getNote(sortedNotes[c.rootIndex]).name;
             const bassNoteName = c.rootIndex === 0 ? rootNoteName : getNote(sortedNotes[0]).name;
             let chordName = rootNoteName + chordTypes[c.format].notation;
@@ -323,4 +290,27 @@ function getIntervals(sortedMidiNotes) {
         intervals.push(sortedMidiNotes[i+1] - sortedMidiNotes[i]);
     }        
     return intervals;
+}
+
+function appendInvertedChordIntervals(chordIntervals) {
+    const invertedIntervals = [];
+    for (const [index, c] of chordIntervals.entries()) {
+        c.chordIndex = index;
+        c.rootIndex = 0;
+        c.inversion = 0;
+        let currentInterval = c.intervals;
+        for (let i=0; i<c.intervals.length; i++) {
+            const inverted = invertInterval(currentInterval);
+            invertedIntervals.push({
+                intervals: inverted,
+                format: c.format,
+                chordIndex: index,                
+                rootIndex: currentInterval.length-i,
+                inversion: i+1,
+            });
+            currentInterval = inverted;
+        }
+    }
+    return [...chordIntervals, ...invertedIntervals]
+        .toSorted((a,b) => a.inversion - b.inversion || a.chordIndex - b.chordIndex);
 }

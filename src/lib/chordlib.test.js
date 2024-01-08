@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { getNote, getChord, getScales, chordTypes, Chord } from './chordlib.js'
+import { getNote, getChord, getScales, invertInterval, chordTypes, Chord } from './chordlib.js'
 
 test ('gets major note', () => {
     const result = getNote(60);
@@ -143,3 +143,13 @@ test ('gets scales', () => {
     expect(result[3][0].scale.nameWithKey).toBe('E Harmonic Minor');
     expect(result[3][0].degree).toBe(6);
 })
+
+test('inverts interval', () => {
+    let interval = [3, 3, 5];
+    const expectedIntervals = [[3, 5, 1], [5, 1, 3], [1, 3, 3], interval];
+    for (let i=0; i<expectedIntervals.length; i++) {
+        const result = invertInterval(interval);
+        expect(result).toEqual(expectedIntervals[i]);
+        interval = result;
+    }
+});
